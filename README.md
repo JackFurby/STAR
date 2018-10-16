@@ -12,12 +12,6 @@ A ternary search tree is a data structure where nodes are arranged in a similar 
 
 A ternary search tree is made up of nodes linked together. Each node is made up of a **character**, an **indicator** to show if a character is at the end of a word and **3 pointers**. One pointer points to a character with a lower value, one to a character with a higher value and one to the next character in the word.
 
-|--------------|
-|char|indicator|
-|--------------|
-|x   |x   |x   |
-|--------------|
-
 A word is represented with a prefix node and all other nodes in the middle subtree. It is also possible for a word to have its initial node(s) from nodes thither up the tree which branch out. For instance if there are the nodes [A, N] linked in that order by the next character reference they represent the word 'an'. If there is an additional node 'C' before 'A' in the tree which references 'A' via the lower value reference then we can also show the word 'can'.
 
 ## Words
