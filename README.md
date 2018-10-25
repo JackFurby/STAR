@@ -14,7 +14,7 @@ A ternary search tree is made up of nodes linked together. Each node is made up 
 
 A word is represented by leaf nodes and by some inner nodes that are marked as accepted words.
 
-[logo]: https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Trie_example.svg/400px-Trie_example.svg.png
+![alt text](https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Trie_example.svg/400px-Trie_example.svg.png)
 
 (Image of trie data structure was taken from https://en.wikipedia.org/wiki/Trie)
 
