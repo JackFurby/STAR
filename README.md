@@ -4,15 +4,19 @@ Scrabble Turn Automation Robot is a solver to scrabble. It will be able to give 
 
 ## Data structure
 
-### Ternary Search Tree
+### Trie
 
-A ternary search tree is a data structure where nodes are arranged in a similar manor to a binary search tree but with up to 3 children. This structure can be used as a map for strings and allow incremental string search. This is being used here as it is more space efficient than the trie data structure with the sacrifice of some performance for space complexity. In this project a ternary search tree will be used to store accepted words in a format that is efficient to search.
+A trie is a data structure used to store a dynamic set or associative array where the keys are usually strings. Each node will have a key who's value will be based on its position. This will be such that nodes before node X will be the prefix and nodes after will become the suffix. The root node is the empty string In this project a trie data structure will be used to store accepted words in a format that is efficient to search.
 
 #### node
 
-A ternary search tree is made up of nodes linked together. Each node is made up of a **character**, an **indicator** to show if a character is at the end of a word and **3 pointers**. One pointer points to a character with a lower value, one to a character with a higher value and one to the next character in the word.
+A ternary search tree is made up of nodes linked together. Each node is made up of a **string**, **indicator** and **pointers**. It is possible for there to be 26 pointers however this is not space efficient and therefore another approach may be used in my implementation.
 
-A word is represented with a prefix node and all other nodes in the middle subtree. It is also possible for a word to have its initial node(s) from nodes thither up the tree which branch out. For instance if there are the nodes [A, N] linked in that order by the next character reference they represent the word 'an'. If there is an additional node 'C' before 'A' in the tree which references 'A' via the lower value reference then we can also show the word 'can'.
+A word is represented by leaf nodes and by some inner nodes that are marked as accepted words.
+
+[logo]: https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Trie_example.svg/400px-Trie_example.svg.png
+
+(Image of trie data structure was taken from https://en.wikipedia.org/wiki/Trie)
 
 ## Words
 
