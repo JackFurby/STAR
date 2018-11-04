@@ -60,7 +60,6 @@ class Trie:
 		else:
 			return True
 
-
 	def wordSearch(self, letters, currentNode=None):
 		"""Given a list of letters find all words that can be made."""
 		# list of all words found
@@ -81,7 +80,13 @@ class Trie:
 			for letter in letters:
 				if letter not in searched:
 					searched.append(letter)
-					if letter in currentNode.children:
+					# if wildcard played then look at all children
+					if letter == '?':
+						for char in currentNode.children:
+							newLetters = letters.copy()
+							del newLetters[i]
+							words += self.wordSearch(newLetters, currentNode.children[char])
+					elif letter in currentNode.children:
 						newLetters = letters.copy()
 						del newLetters[i]
 						words += self.wordSearch(newLetters, currentNode.children[letter])
@@ -114,3 +119,5 @@ if __name__ == '__main__':
 	# print("goodbye in trie:", trie.hasWord('goodbye'))
 	# print("furby in trie:", trie.hasWord('furby'))
 	print("words in ['h', 'e', 'l', 'l', 'o']:", trie.wordSearch(['h', 'e', 'l', 'l', 'o']))
+	print("words in ['i', '?']:", trie.wordSearch(['i', '?']))
+	print("words in ['a', 'z', 'j', 'g', 'd', 'i', '?']:", trie.wordSearch(['a', 'z', 'j', 'g', 'd', 'i', '?']))
