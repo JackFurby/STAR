@@ -10,7 +10,19 @@ A trie is a data structure used to store a dynamic set or associative array wher
 
 #### node
 
-A ternary search tree is made up of nodes linked together. Each node is made up of a **string**, **indicator** and **pointers**. It is possible for there to be 26 pointers however this is not space efficient and therefore another approach may be used in my implementation.
+A trie is made up of nodes linked together. Each node is made up of a **value**, **indicator** and **pointers**. In my implementation the value is called data, indicator is called end and pointers are children.
+* The indicator is used to mark the current node as the end of a word.
+* The value stores the current word. This is not required but will save time if you want to return the word found.
+* the pointers can be seperated out but in my implementation I have used a dictionary as it means I can store as many unique keys as I like and will not be taking up any extra storage for unused pointers.
+
+```Python
+class Node:
+	def __init__(self, end=False, data=None):
+		"""Initilise the node."""
+		self.end = end
+		self.data = data
+		self.children = dict()
+```
 
 A word is represented by leaf nodes and by some inner nodes that are marked as accepted words.
 
