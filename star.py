@@ -1,7 +1,7 @@
 """STAR."""
 import glob
 import errno
-import csv
+import time
 
 
 class Node:
@@ -116,8 +116,22 @@ if __name__ == '__main__':
 	""" Example use """
 	trie = Trie()
 	setup(trie)
+
+	run = True
+
+	while run:
+		inputLetters = input("Enter letters: ")
+
+		if inputLetters == '\q':
+			run = False
+			break
+
+		start = time.time()
+		print("Words:", trie.wordSearch(list(inputLetters)))
+		end = time.time()
+		print("Completed search in", end - start, 'seconds')
 	# print("goodbye in trie:", trie.hasWord('goodbye'))
 	# print("furby in trie:", trie.hasWord('furby'))
-	print("words in ['h', 'e', 'l', 'l', 'o']:", trie.wordSearch(['h', 'e', 'l', 'l', 'o']))
-	print("words in ['i', '?']:", trie.wordSearch(['i', '?']))
-	print("words in ['a', 'z', 'j', 'g', 'd', 'i', '?']:", trie.wordSearch(['a', 'z', 'j', 'g', 'd', 'i', '?']))
+	# print("words in ['h', 'e', 'l', 'l', 'o']:", trie.wordSearch(['h', 'e', 'l', 'l', 'o']))
+	# print("words in ['i', '?']:", trie.wordSearch(['i', '?']))
+	# print("words in ['a', 'z', 'j', 'g', 'd', 'i', '?']:", trie.wordSearch(['a', 'z', 'j', 'g', 'd', 'i', '?']))
