@@ -66,14 +66,15 @@ class Trie:
 
 def setup(trie):
 	"""Add each word from csv files to trie data structure."""
-	path = './words/*.csv'
+	path = './words/*.txt'
 	files = glob.glob(path)
 	for name in files:
 		try:
-			with open(name) as csvfile:
-				reader = csv.reader(csvfile, delimiter=',')
-				for row in reader:
-					trie.addWord(row[0].lower())
+			f = open(name, "r").read().splitlines()
+			lines = list(f)
+			print(len(lines), 'total words')
+			for word in lines:
+				trie.addWord(word.lower())
 		except IOError as exc:
 			if exc.errno != errno.EISDIR:
 				raise
