@@ -37,6 +37,7 @@ class Trie:
 				currentNode = currentNode.children[word[i]]
 				if i == len(word) - 1:
 					currentNode.end = True
+					currentNode.data = word
 			else:
 				if i < len(word) - 1:
 					currentNode.children[word[i]] = Node(False)
