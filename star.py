@@ -29,15 +29,14 @@ class Trie:
 		currentNode = self.head
 
 		for i in range(len(word)):
-			# print(word)
-			# print(word[i])
-			# print(word[i] in currentNode.children)
-			# print(currentNode.children)
+			# if letter already exists in children move to the node
 			if word[i] in currentNode.children:
 				currentNode = currentNode.children[word[i]]
+				# if letter is then end of word being added update node to show this
 				if i == len(word) - 1:
 					currentNode.end = True
 					currentNode.data = word
+			# if letter is not in children add it
 			else:
 				if i < len(word) - 1:
 					currentNode.children[word[i]] = Node(False)
@@ -52,16 +51,44 @@ class Trie:
 
 		currentNode = self.head
 		for letter in word:
-			# print(letter)
-			# print(letter in currentNode.children)
-			# print(currentNode.end)
 			if letter in currentNode.children:
 				currentNode = currentNode.children[letter]
 
+		# if final node marks the end of a word return true
 		if currentNode.end is False:
 			return False
 		else:
 			return True
+
+
+	def wordSearch(self, letters, currentNode=None):
+		"""Given a list of letters find all words that can be made."""
+		# list of all words found
+		words = []
+
+		if currentNode is None:
+			currentNode = self.head
+
+		# if word found then add it to words
+		if currentNode.end:
+			words.append(currentNode.data)
+
+		if len(letters) is not 0:
+			# i keeps track of current letter
+			# searched stop duplicate searches if input has repeated letters
+			i = 0
+			searched = []
+			for letter in letters:
+				if letter not in searched:
+					searched.append(letter)
+					if letter in currentNode.children:
+						newLetters = letters.copy()
+						del newLetters[i]
+						words += self.wordSearch(newLetters, currentNode.children[letter])
+				i += 1
+
+		# return words found
+		return words
 
 
 def setup(trie):
@@ -84,12 +111,6 @@ if __name__ == '__main__':
 	""" Example use """
 	trie = Trie()
 	setup(trie)
-	# words = 'ice iceberg icebergs iceblink iceblinks icebox iceboxes iced'
-	# for word in words.split():
-	# 	trie.addWord(word)
-	print("good in trie:", trie.hasWord('good'))
-	print("goodbye in trie:", trie.hasWord('goodbye'))
-	print("sumo in trie:", trie.hasWord('sumo'))
-	print("iced in trie:", trie.hasWord('iced'))
-	print("icebox in trie:", trie.hasWord('icebox'))
-	print("iceboxes in trie:", trie.hasWord('iceboxes'))
+	# print("goodbye in trie:", trie.hasWord('goodbye'))
+	# print("furby in trie:", trie.hasWord('furby'))
+	print("words in ['h', 'e', 'l', 'l', 'o']:", trie.wordSearch(['h', 'e', 'l', 'l', 'o']))
