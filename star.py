@@ -72,7 +72,8 @@ class Trie:
 		# if word found then add it to words
 		if currentNode.end:
 			# only add word and word score to words list
-			words.append([currentNode.data[0], currentNode.data[1][1]])
+						words.append([currentNode.data[0], currentNode.data[1]])
+
 
 		if len(letters) is not 0:
 			# i keeps track of current letter
@@ -133,14 +134,12 @@ def letterScore(letter):
 
 def getScore(word):
 	"""Return a tuple with a score and breakdown a given word would get."""
-	score = []
 	breakdown = []
 	for letter in word:
 		breakdown.append(letterScore(letter))
 	total = sum(breakdown)
-	score.append(breakdown)
-	score.append(total)
-	return score
+	return total
+
 
 def setup(trie):
 	"""Add each word from csv files to trie data structure."""
@@ -176,7 +175,7 @@ if __name__ == '__main__':
 	""" Example use """
 	# trie = Trie()
 	# setup(trie)
-	#save_trie(trie, 'v1')
+	# save_trie(trie, 'v1')
 
 	trie = load_trie('v1')
 
