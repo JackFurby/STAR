@@ -188,6 +188,9 @@ if __name__ == '__main__':
 			run = False
 			break
 
+		# Makes sure input is in lower case
+		inputLetters = inputLetters.lower()
+
 		start = time.time()
 		wordList = trie.wordSearch(list(inputLetters))
 		wordList.sort(key=lambda tup: -tup[1])
