@@ -54,6 +54,8 @@ class Trie:
 		for letter in word:
 			if letter in currentNode.children:
 				currentNode = currentNode.children[letter]
+			else:
+				return False
 
 		# if final node marks the end of a word return true
 		if currentNode.end is False:
