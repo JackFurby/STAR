@@ -2,6 +2,8 @@
 
 Scrabble Turn Automation Robot is a solver for scrabble. It will be able to give accepted words when given a set of characters.
 
+Try it out at https://star.jackfurby.co.uk/
+
 ## Data structure
 
 ### Trie
