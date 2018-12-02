@@ -1,8 +1,17 @@
 """STAR."""
 import time
-from board import board
+from board import Board
 from setup import setup, letterScore, getScore, save_trie, load_trie
 from trie import Trie, Node
+
+
+def numInput(userInput):
+	"""make sure the user enters an integer."""
+	if userInput.isdigit():
+		return int(userInput)
+	else:
+		userInput = input("You must enter a integer: ")
+		return numInput(userInput)
 
 
 if __name__ == '__main__':
@@ -12,6 +21,7 @@ if __name__ == '__main__':
 	# save_trie(trie, 'v1')
 
 	trie = load_trie('v1')
+	currentBoard = Board()
 
 	run = True
 
@@ -43,6 +53,18 @@ if __name__ == '__main__':
 			print(*wordList, sep='\n')
 			end = time.time()
 			print("Completed search in", end - start, 'seconds')
+		elif action == "board":
+			currentBoard.printBoard()
+		elif action == "addLetter":
+			letter = input("Enter letter: ")
+			value = numInput(input("Enter tile value: "))
+			x = numInput(input("Enter x (starting from 0 in top left): "))
+			y = numInput(input("Enter y (starting from 0 in top left): "))
+			if currentBoard.addLetter(letter, value, x, y):
+				print("Board updated")
+			# If addLetter returns False then x or y is out of range (specified in board.py)
+			else:
+				print("X and Y cannot be above 14")
 		elif action == "help":
 			print("")
 			print("=== STAR help ===")
@@ -50,6 +72,8 @@ if __name__ == '__main__':
 			print("\q		-	Exit STAR")
 			print("isAccepted	-	Enter a single word to find out if it is accepted or not")
 			print("findWords	-	Find all words you can make with a given set of characters")
+			print("board		-	Display the current state of the board")
+			print("addLetter	-	Add a letter to the board")
 			print("")
 		else:
 			print("Input not recognised")
