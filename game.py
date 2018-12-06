@@ -48,8 +48,7 @@ class Tiles:
 
 	def __init__(self):
 		"""Initilise the board."""
-
-		# All tiles with quantity to use in game
+		# All tiles with quantity
 		startingLetters = [
 						['a', 9],
 						['b', 2],
