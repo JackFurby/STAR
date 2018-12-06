@@ -1,6 +1,6 @@
 """STAR."""
 import time
-from board import Board
+from game import Board, Tiles
 from setup import setup, letterScore, getScore, save_trie, load_trie
 from trie import Trie, Node
 
@@ -22,6 +22,7 @@ if __name__ == '__main__':
 
 	trie = load_trie('v1')
 	currentBoard = Board()
+	currentTiles = Tiles()
 
 	run = True
 
@@ -65,6 +66,10 @@ if __name__ == '__main__':
 			# If addLetter returns False then x or y is out of range (specified in board.py)
 			else:
 				print("X and Y cannot be above 14")
+		elif action == "letters":
+			currentTiles.printLetters()
+		elif action == "takeLetter":
+			print(currentTiles.takeLetter())
 		elif action == "help":
 			print("")
 			print("=== STAR help ===")
@@ -74,6 +79,8 @@ if __name__ == '__main__':
 			print("findWords	-	Find all words you can make with a given set of characters")
 			print("board		-	Display the current state of the board")
 			print("addLetter	-	Add a letter to the board")
+			print("letters		-	Display the current letters available to take")
+			print("takeLetter	-	take a letter from the available letters")
 			print("")
 		else:
 			print("Input not recognised")
