@@ -1,6 +1,29 @@
 """Game environment."""
 import random
 
+
+class Game:
+	"""Scrabble game env."""
+
+	def __init__(self):
+		"""Initilise the board."""
+		self.board = Board()
+		self.players = []
+		self.tiles = Tiles()
+
+	def newPlayer(self):
+		"""Create a new player (max 4 per game) with no tiles."""
+		if len(self.players) < 4:
+			self.players.append(Player())
+			return len(self.players) - 1  # Return the player index
+		# Player count is 4. No more allowed
+		else:
+			return False
+
+	def getPlayer(self, index):
+		"""Return a player given an index."""
+		return self.players[index]
+
 class Board:
 	"""Scrabble board."""
 
@@ -23,6 +46,7 @@ class Board:
 					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW']
 					]
+		self.players = [None] * 4
 
 	def addLetter(self, letter, value, x, y):
 		"""Add a letter to the board specifying x and y position."""
@@ -96,10 +120,13 @@ class Tiles:
 
 	def takeLetter(self):
 		"""Remove a letter from self.letters and return it."""
-		index = random.randint(0, len(self.letters) - 1)
-		letter = self.letters[index]
-		del self.letters[index]
-		return letter
+		if len(self.letters) > 0:
+			index = random.randint(0, len(self.letters) - 1)
+			letter = self.letters[index]
+			del self.letters[index]
+			return letter
+		else:
+			return None
 
 	def printLetters(self):
 		"""Print the current letters not taken in the game."""
@@ -109,8 +136,20 @@ class Tiles:
 class Player:
 	"""A player instance for the game."""
 
-	letters = [None] * 7
-	score = 0
+	def __init__(self):
+		"""Initilise the player."""
+		self.letters = [None] * 7
+		self.score = 0
+
+	def takeLetters(self, gameLetters):
+		"""Add letters to player until player has 7 letters."""
+		for i in range(len(self.letters)):
+			if self.letters[i] is None:
+				self.letters[i] = gameLetters.takeLetter()
+
+	def printLetters(self):
+		"""Print the current letters the player has to use."""
+		print(self.letters)
 
 
 def letterScore(letter):

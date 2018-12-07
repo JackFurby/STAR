@@ -1,12 +1,12 @@
 """STAR."""
 import time
-from game import Board, Tiles
+from game import Board, Tiles, Game
 from setup import setup, letterScore, getScore, save_trie, load_trie
 from trie import Trie, Node
 
 
 def numInput(userInput):
-	"""make sure the user enters an integer."""
+	"""Make sure the user enters an integer."""
 	if userInput.isdigit():
 		return int(userInput)
 	else:
@@ -21,7 +21,7 @@ if __name__ == '__main__':
 	# save_trie(trie, 'v1')
 
 	trie = load_trie('v1')
-	currentBoard = Board()
+	game = Game()
 	currentTiles = Tiles()
 
 	run = True
@@ -55,21 +55,33 @@ if __name__ == '__main__':
 			end = time.time()
 			print("Completed search in", end - start, 'seconds')
 		elif action == "board":
-			currentBoard.printBoard()
+			game.board.printBoard()
 		elif action == "addLetter":
 			letter = input("Enter letter: ")
 			value = numInput(input("Enter tile value: "))
 			x = numInput(input("Enter x (starting from 0 in top left): "))
 			y = numInput(input("Enter y (starting from 0 in top left): "))
-			if currentBoard.addLetter(letter, value, x, y):
+			if game.board.addLetter(letter, value, x, y):
 				print("Board updated")
 			# If addLetter returns False then x or y is out of range (specified in board.py)
 			else:
 				print("X and Y cannot be above 14")
 		elif action == "letters":
-			currentTiles.printLetters()
-		elif action == "takeLetter":
-			print(currentTiles.takeLetter())
+			game.tiles.printLetters()
+		elif action == "makePlayer":
+			playerIndex = game.newPlayer()
+			if playerIndex is not False:
+				print("Player " + str(playerIndex + 1) + " created")
+			else:
+				print("Max player limit reached")
+		elif action == "takeLetters":
+			# Get the player index in array
+			player = game.players[numInput(input("Enter player number: ")) - 1]
+			player.takeLetters(game.tiles)
+		elif action == "playerLetters":
+			# Get the player index in array
+			player = game.players[numInput(input("Enter player number: ")) - 1]
+			player.printLetters()
 		elif action == "help":
 			print("")
 			print("=== STAR help ===")
@@ -80,7 +92,9 @@ if __name__ == '__main__':
 			print("board		-	Display the current state of the board")
 			print("addLetter	-	Add a letter to the board")
 			print("letters		-	Display the current letters available to take")
-			print("takeLetter	-	take a letter from the available letters")
+			print("makePlayer	-	Makes a new player (max 4)")
+			print("takeLetters	-	Fills up a specified players letters")
+			print("playerLetters	-	Prints the letters a given player has")
 			print("")
 		else:
 			print("Input not recognised")
