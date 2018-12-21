@@ -100,3 +100,29 @@ def wordSearch(self, letters, currentNode=None):
 	return words
 
 ```
+
+## Environment
+
+STAR has a complete environment to represent Scrabble (WIP). It has various abilities with the current offerings being;
+
+```
+
+isAccepted	-	Enter a single word to find out if it is accepted or not
+findWords	-	Find all words you can make with a given set of characters
+board		-	Display the current state of the board
+addLetter	-	Add a letter to the board
+letters		-	Display the current letters available to take
+makePlayer	-	Makes a new player (max 4)
+takeLetters	-	Fills up a specified players letters
+playerLetters	-	Prints the letters a given player has
+playTurn	-	Make a move for the current players turn
+activePlayer	-	Print the current active player
+
+```
+
+Over time some of these will be removed in order to only allow legal moves. Following from the data structure section of this project isAccepted and findWords allow interaction with the word trie. All other actions will interact with the game environment.
+
+
+### playTurn
+
+The option playTurn once created will allow the current active player to enter a word to place, starting position (X and Y) on the board and word direction (right or down). This input will be checked with the game rules and if legal will be played and the player updated with a new score and tiles. The environment will then move onto the next player.
