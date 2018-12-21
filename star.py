@@ -91,9 +91,10 @@ if __name__ == '__main__':
 				player = game.players[game.active]
 
 				# Player makes a move
-				# > enter word to play
-				# > enter word direction (right or down)
-				# > if word is valid then play word and update player score
+				# > player choses between placing a word, changing tiles or doing nothing
+				# > enter word to play (if selected)
+				# 	- enter word direction (right or down)
+				# 	- if word is valid then play word and update player score
 
 				# refill player letters
 				player.takeLetters(game.tiles)
