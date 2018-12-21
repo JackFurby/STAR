@@ -82,6 +82,19 @@ if __name__ == '__main__':
 			# Get the player index in array
 			player = game.players[numInput(input("Enter player number: ")) - 1]
 			player.printLetters()
+		elif action == "playTurn":
+			if len(game.players) == 0:
+				print("No current players")
+			else:
+				player = game.players[game.active]
+				print("Player " + str(game.active + 1) + " it's your turn")
+
+				# Player makes a move
+
+				# refill player letters
+				player.takeLetters(game.tiles)
+				# change player
+				game.nextPlayer()
 		elif action == "help":
 			print("")
 			print("=== STAR help ===")
@@ -95,6 +108,7 @@ if __name__ == '__main__':
 			print("makePlayer	-	Makes a new player (max 4)")
 			print("takeLetters	-	Fills up a specified players letters")
 			print("playerLetters	-	Prints the letters a given player has")
+			print("playTurn	-	Make a move for the current players turn")
 			print("")
 		else:
 			print("Input not recognised")

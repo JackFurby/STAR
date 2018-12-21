@@ -6,10 +6,11 @@ class Game:
 	"""Scrabble game env."""
 
 	def __init__(self):
-		"""Initilise the board."""
+		"""Initilise the game."""
 		self.board = Board()
 		self.players = []
 		self.tiles = Tiles()
+		self.active = 0
 
 	def newPlayer(self):
 		"""Create a new player (max 4 per game) with no tiles."""
@@ -24,6 +25,25 @@ class Game:
 		"""Return a player given an index."""
 		return self.players[index]
 
+	def activePlayer(self):
+		"""Return the current active player in a given game."""
+		if len(self.players) == 0:
+			return False
+		else:
+			return self.players[self.active]
+
+	def nextPlayer(self):
+		"""Update active to active +1 wraping to first player after last one."""
+		if len(self.players) == 0:
+			return False
+		# At end of player list. Go back to first one
+		elif self.active == len(self.players) - 1:
+			self.active = 0
+		# Change active player to next player
+		else:
+			self.active = self.active + 1
+
+
 class Board:
 	"""Scrabble board."""
 
@@ -33,15 +53,15 @@ class Board:
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW'],
 					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
 					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
-					[None, None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, None],
+					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
 					[None, None, None, None, 'DW', None, None, None, None, None, 'DW', None, None, None, None],
-					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, None, None],
+					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None],
 					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DL', None, None],
 					['TW', None, None, 'DL', None, None, None, 'DW', None, None, None, 'DL', None, None, 'TW'],
 					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DL', None, None],
-					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, None, None],
+					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None],
 					[None, None, None, None, 'DW', None, None, None, None, None, 'DW', None, None, None, None],
-					[None, None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, None],
+					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
 					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
 					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW']
