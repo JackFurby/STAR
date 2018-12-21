@@ -72,6 +72,8 @@ if __name__ == '__main__':
 			playerIndex = game.newPlayer()
 			if playerIndex is not False:
 				print("Player " + str(playerIndex + 1) + " created")
+				# add 7 tiles to player
+				game.players[playerIndex].takeLetters(game.tiles)
 			else:
 				print("Max player limit reached")
 		elif action == "takeLetters":
@@ -87,14 +89,22 @@ if __name__ == '__main__':
 				print("No current players")
 			else:
 				player = game.players[game.active]
-				print("Player " + str(game.active + 1) + " it's your turn")
 
 				# Player makes a move
+				# > enter word to play
+				# > enter word direction (right or down)
+				# > if word is valid then play word and update player score
 
 				# refill player letters
 				player.takeLetters(game.tiles)
 				# change player
 				game.nextPlayer()
+				print("Player " + str(game.active + 1) + " it's your turn")
+		elif action == "activePlayer":
+			if len(game.players) == 0:
+				print("No current players")
+			else:
+				print("Player " + str(game.active + 1) + " it's your turn")
 		elif action == "help":
 			print("")
 			print("=== STAR help ===")
@@ -109,6 +119,7 @@ if __name__ == '__main__':
 			print("takeLetters	-	Fills up a specified players letters")
 			print("playerLetters	-	Prints the letters a given player has")
 			print("playTurn	-	Make a move for the current players turn")
+			print("activePlayer	-	Print the current active player")
 			print("")
 		else:
 			print("Input not recognised")
