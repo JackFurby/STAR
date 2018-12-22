@@ -65,7 +65,7 @@ if __name__ == '__main__':
 				print("Board updated")
 			# If addLetter returns False then x or y is out of range (specified in board.py)
 			else:
-				print("X and Y cannot be above 14")
+				print("X and Y cannot be above 14 or ontop of another tile")
 		elif action == "letters":
 			game.tiles.printLetters()
 		elif action == "makePlayer":
@@ -90,12 +90,56 @@ if __name__ == '__main__':
 			else:
 				player = game.players[game.active]
 
+				turn = True
+
+				while turn:
+					playOption = input("Enter 1 to skip turn, 2 to swap some letters or 3 to place tile(s): ")
+
+					# player selects what they want to do
+					if playOption == '1':
+						# Go skipped
+						print("Go skipped")
+						turn = False
+					elif playOption == '2':
+						# Player replaces 0 or more tiles
+						player.printLetters()
+						swapTiles = []  # list of tiles to swap
+						stillEntering = True
+						while stillEntering:
+							selectedTile = numInput(input("Input a tile to replace (0 is the first tile, 6 is the last). Enter 7 to stop selection: "))
+							if selectedTile == 7:  # stop swapping tiles. All tiles in swapTiles are replaces
+								player.takeLetters(game.tiles)
+								game.tiles.letters.extend(swapTiles)
+								stillEntering = False
+							elif selectedTile >= 0 and selectedTile <= 6:
+								if player.letters[selectedTile] == None:
+									print("Tile already selected")
+								else:
+									swapTiles.append(player.letters[selectedTile])
+									player.letters[selectedTile] = None
+									print("letters left: " + str(player.letters))
+									print("letters removed: " + str(swapTiles))
+									if len(swapTiles) == 7:  # swap all tiles
+										player.takeLetters(game.tiles)
+										game.tiles.letters.extend(swapTiles)
+										stillEntering = False
+							else:
+								print("Input out of range")
+						turn = False
+					elif playOption == '3':
+						# Player places 1 or more tiles
+						removeTiles = input("Enter tiles to replace (0 is the first tile, 6 is the last) seperated by commas: ")
+						turn = False
+					else:
+						print("input not recognised")
+
 				# Player makes a move
 				# > player choses between placing a word, changing tiles or doing nothing
 				# > enter word to play (if selected)
 				# 	- enter word direction (right or down)
 				# 	- if word is valid then play word and update player score
 
+				print("Player " + str(game.active + 1) + " your score is " + str(player.score))
 				# refill player letters
 				player.takeLetters(game.tiles)
 				# change player

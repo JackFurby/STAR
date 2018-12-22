@@ -66,19 +66,21 @@ class Board:
 					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW']
 					]
-		self.players = [None] * 4
+		self.playedTiles = 0
 
 	def addLetter(self, letter, value, x, y):
 		"""Add a letter to the board specifying x and y position."""
 		x = int(x)
 		y = int(y)
 
-		if x > 14 or y > 14:
+		# Tile cannot be out of range or ontop of another tile
+		if x > 14 or y > 14 or self.board[int(y)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
 			return False
 		else:
 			# tile stored as list so value of tile can be stored (blanks are worth 0)
 			tile = [letter.lower(), value]
 			self.board[int(y)][int(x)] = tile
+			self.playedTiles = self.playedTiles + 1
 			return True
 
 	def printBoard(self):
@@ -170,6 +172,12 @@ class Player:
 	def printLetters(self):
 		"""Print the current letters the player has to use."""
 		print(self.letters)
+
+	def printScore(self):
+		"""Print the players score."""
+		print(self.score)
+
+
 
 
 def letterScore(letter):
