@@ -112,7 +112,7 @@ if __name__ == '__main__':
 								game.tiles.letters.extend(swapTiles)
 								stillEntering = False
 							elif selectedTile >= 0 and selectedTile <= 6:
-								if player.letters[selectedTile] == None:
+								if player.letters[selectedTile] is None:
 									print("Tile already selected")
 								else:
 									swapTiles.append(player.letters[selectedTile])
