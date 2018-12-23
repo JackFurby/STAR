@@ -178,8 +178,6 @@ class Player:
 		print(self.score)
 
 
-
-
 def letterScore(letter):
 	"""Return a score a given letter is worth."""
 	return {

@@ -128,7 +128,39 @@ if __name__ == '__main__':
 						turn = False
 					elif playOption == '3':
 						# Player places 1 or more tiles
-						removeTiles = input("Enter tiles to replace (0 is the first tile, 6 is the last) seperated by commas: ")
+						player.printLetters()
+						word = []  # List of tiles to play with score (in order)
+						stillEntering = True
+						while stillEntering:
+							selectedTile = numInput(input("Input a tile to use in order (0 is the first tile, 6 is the last). Enter 7 to stop selection: "))
+							if selectedTile == 7:  # Stop adding tiles to play
+								print(word)
+								stillEntering = False
+							elif selectedTile >= 0 and selectedTile <= 6:  # Add tile to play
+								if player.letters[selectedTile] is None:
+									print("Tile already selected")
+								else:
+									if player.letters[selectedTile] is '?':  # If tile is a blank then provide character and add score of 0
+										while True:
+											char = input("input letter: ")
+											if char.isalpha():
+												break
+											print("Please enter characters a-z only")
+										word.append([char.lower(), 0])
+									else:  # Add tile to word list
+										word.append([player.letters[selectedTile], letterScore(player.letters[selectedTile])])
+									player.letters[selectedTile] = None
+									print("letters left: " + str(player.letters))
+									print("letters used: " + str(word))
+									if len(word) == 7:  # swap all tiles
+										stillEntering = False
+							else:
+								print("Input out of range")
+
+						# WIP - add tiles start position and direction
+						x = numInput(input("Enter x of first tile (starting from 0 in top left): "))
+						y = numInput(input("Enter y of first tile (starting from 0 in top left): "))
+
 						turn = False
 					else:
 						print("input not recognised")
