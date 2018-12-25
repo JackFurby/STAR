@@ -83,6 +83,12 @@ class Board:
 			self.playedTiles = self.playedTiles + 1
 			return True
 
+	def addWord(self, word, x, y, direction):
+		"""Add a word to the board specifying the x and y position of the first tile."""
+		# Checks if the word placement is valid
+		# If placement is valid return score
+		# If placement is not valid return False
+
 	def printBoard(self):
 		"""Print the current state of the board."""
 		for row in self.board:

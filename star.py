@@ -88,6 +88,7 @@ if __name__ == '__main__':
 			if len(game.players) == 0:
 				print("No current players")
 			else:
+				print("Player " + str(game.active + 1) + " it's your turn")
 				player = game.players[game.active]
 
 				turn = True
@@ -128,8 +129,13 @@ if __name__ == '__main__':
 						turn = False
 					elif playOption == '3':
 						# Player places 1 or more tiles
+						print()
+						game.board.printBoard()
+						print()
 						player.printLetters()
+						print()
 						word = []  # List of tiles to play with score (in order)
+						playerBackup = player.letters.copy()  # backup of player tiles incase input is not accepted
 						stillEntering = True
 						while stillEntering:
 							selectedTile = numInput(input("Input a tile to use in order (0 is the first tile, 6 is the last). Enter 7 to stop selection: "))
@@ -157,26 +163,37 @@ if __name__ == '__main__':
 							else:
 								print("Input out of range")
 
-						# WIP - add tiles start position and direction
-						x = numInput(input("Enter x of first tile (starting from 0 in top left): "))
-						y = numInput(input("Enter y of first tile (starting from 0 in top left): "))
+						if len(word) > 0:
+							# Add tiles start position and direction
+							x = numInput(input("Enter x of first tile (starting from 0 in top left): "))
+							y = numInput(input("Enter y of first tile (starting from 0 in top left): "))
 
-						turn = False
+							while True:
+								direction = input("enter direction of word (right/down): ")
+								if direction == 'right' or direction == 'down':
+									break
+								print("Input not recognised")
+
+							# Verify word placement is valid and play it if it is
+							if game.board.addWord(word, x, y, direction):
+								# Word accepted. End turn
+								turn = False
+							else:
+								# Word not accepeted. Reset player and try again
+								print("Input not accepted")
+								player.letters = playerBackup
+						else :
+							print("No tiles selected. Turn skipped")
+							turn = False
+
 					else:
 						print("input not recognised")
-
-				# Player makes a move
-				# > player choses between placing a word, changing tiles or doing nothing
-				# > enter word to play (if selected)
-				# 	- enter word direction (right or down)
-				# 	- if word is valid then play word and update player score
 
 				print("Player " + str(game.active + 1) + " your score is " + str(player.score))
 				# refill player letters
 				player.takeLetters(game.tiles)
 				# change player
 				game.nextPlayer()
-				print("Player " + str(game.active + 1) + " it's your turn")
 		elif action == "activePlayer":
 			if len(game.players) == 0:
 				print("No current players")
