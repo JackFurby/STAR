@@ -73,9 +73,12 @@ class Board:
 		x = int(x)
 		y = int(y)
 
-		# Tile cannot be out of range or ontop of another tile
-		if x > 14 or y > 14 or self.board[int(y)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+		# Tile cannot be out of range
+		if (x > 14 or x < 0) or (y > 14 or y < 0):
 			return False
+		# tile cannot be onto of another tile
+		elif self.board[int(y)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+			return -1
 		else:
 			# tile stored as list so value of tile can be stored (blanks are worth 0)
 			tile = [letter.lower(), value]
@@ -83,11 +86,104 @@ class Board:
 			self.playedTiles = self.playedTiles + 1
 			return True
 
+	def checkWord(self, x, y, direction, beginning):
+		"""Given the x, y, and if the word stats, ends or contains that tile will return true or false if the word is valid."""
+
+	def addLetters(self, letters, x, y, direction):
+		"""Add letters one at a time from word input, checks it and calls itself."""
+		# Place tile
+		letterPlacement = self.addLetter(letters[0][0], letters[0][1], x, y)
+
+		# Set default values
+		nextToTiles = False  # True if tile played is next to tile(s) already in play
+		score = 0  # Score of current go
+
+		if letterPlacement is False:
+			return False, nextToTiles, score
+		elif letterPlacement is -1:
+			if direction == 'right':
+				return self.addLetters(letters, x + 1, y, 'right')
+			else:
+				return self.addLetters(letters, x, y + 1, 'down')
+		else:
+			del letters[0]
+
+			# Check tiles next to each tiles places to see if they add to existing words
+			# If true the new word will be checked and return False if not valid
+			if direction == 'right':
+				# If tile above and below is not empty
+				if self.board[int(y - 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW'] and self.board[int(y + 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+					newWord, wordScore = self.checkWord(x, y, direction, None)
+					if newWord is False:
+						return False, nextToTiles, score
+					else:
+						nextToTiles = True
+						score = score + wordScore
+				# If tile above is not empty
+				elif self.board[int(y - 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+					newWord, wordScore = self.checkWord(x, y, direction, False)
+					if newWord is False:
+						return False, nextToTiles, score
+					else:
+						nextToTiles = True
+						score = score + wordScore
+				# If tile below is not empty
+				elif self.board[int(y + 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+					newWord, wordScore = self.checkWord(x, y, direction, True)
+					if newWord is False:
+						return False, nextToTiles, score
+					else:
+						nextToTiles = True
+						score = score + wordScore
+			else:
+				# If tile left and right is not empty
+				if self.board[int(y)][int(x - 1)] not in [None, 'DL', 'DW', 'TL', 'TW'] and self.board[int(y)][int(x + 1)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+					newWord, wordScore = self.checkWord(x, y, direction, None)
+					if newWord is False:
+						return False, nextToTiles, score
+					else:
+						nextToTiles = True
+						score = score + wordScore
+				# If tile left is not empty
+				elif self.board[int(y)][int(x - 1)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+					newWord, wordScore = self.checkWord(x, y, direction, False)
+					if newWord is False:
+						return False, nextToTiles, score
+					else:
+						nextToTiles = True
+						score = score + wordScore
+				# If tile right is not empty
+				elif self.board[int(y)][int(x + 1)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+					newWord, wordScore = self.checkWord(x, y, direction, True)
+					if newWord is False:
+						return False, nextToTiles, score
+					else:
+						nextToTiles = True
+
+		# If at the end of tiles being added to the board check word is accepted
+		if len(letters) == 0:
+			newWord, wordScore = self.checkWord(x, y, direction, False)
+			if newWord is False:
+				return False, nextToTiles, score
+		# tile placed, move to next tile
+		else:
+			if direction == 'right':
+				return self.addLetters(letters, x + 1, y, 'right')
+			else:
+				return self.addLetters(letters, x, y + 1, 'down')
+
 	def addWord(self, word, x, y, direction):
 		"""Add a word to the board specifying the x and y position of the first tile."""
-		# Checks if the word placement is valid
+		# Check if the word placement is valid
 		# If placement is valid return score
 		# If placement is not valid return False
+		boardBackup = self.board.copy()
+
+		if self.addLetters(word, x, y, direction) is False:
+			self.board = boardBackup
+			return False
+		else:
+			return True
 
 	def printBoard(self):
 		"""Print the current state of the board."""
