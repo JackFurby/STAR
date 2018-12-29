@@ -175,14 +175,16 @@ if __name__ == '__main__':
 								print("Input not recognised")
 
 							# Verify word placement is valid and play it if it is
-							if game.board.addWord(word, x, y, direction):
+							tilesAdded, score = game.board.addWord(word, x, y, direction, trie)
+							if tilesAdded:
 								# Word accepted. End turn
 								turn = False
+								player.score = player.score + score
 							else:
 								# Word not accepeted. Reset player and try again
 								print("Input not accepted")
 								player.letters = playerBackup
-						else :
+						else:
 							print("No tiles selected. Turn skipped")
 							turn = False
 
