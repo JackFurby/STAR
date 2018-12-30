@@ -177,7 +177,7 @@ if __name__ == '__main__':
 							# Verify word placement is valid and play it if it is
 							tilesAdded, score = game.board.addWord(word, x, y, direction, trie)
 							if tilesAdded:
-								# Word accepted. End turn
+								# Word accepted. End turn and update score
 								turn = False
 								player.score = player.score + score
 							else:
@@ -194,6 +194,22 @@ if __name__ == '__main__':
 				print("Player " + str(game.active + 1) + " your score is " + str(player.score))
 				# refill player letters
 				player.takeLetters(game.tiles)
+
+				# If player has no tiles after refilling there are not tiles left. Game ends
+				emptyTiles = True
+				for tile in player.letters:
+					if tile is not None:
+						emptyTiles = False
+
+				if emptyTiles:
+					print("")
+					print("=== Game Over ===")
+					print("")
+					for playerNum, player in game.players:
+						print("Player " + str(playerNum + 1) + "	-	" + str(player.score))
+
+					run = False
+
 				# change player
 				game.nextPlayer()
 		elif action == "activePlayer":
