@@ -233,8 +233,7 @@ class Board:
 			else:
 				acceptedReturn, nextToTileReturn, scoreReturn = self.addLetters(letters, x, y + 1, 'down', trie)
 
-			if nextToTileReturn is True:
-				nextToTiles = True
+			nextToTiles = True
 			return acceptedReturn, nextToTiles, score + scoreReturn
 		else:
 			del letters[0]  # tile placed. Remove from list
@@ -248,50 +247,50 @@ class Board:
 			if direction == 'right':
 				# If tile above and below is not empty
 				if self.board[int(y - 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW'] and self.board[int(y + 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
-					newWord, wordScore = self.checkWord(x, y, direction, None, trie, False)
+					newWord, wordScore = self.checkWord(x, y, 'down', None, trie, False)
 					if newWord is False:
-						return False, nextToTiles, score
+						return False, True, score
 					else:
 						nextToTiles = True
 						score = score + wordScore
 				# If tile above is not empty
 				elif self.board[int(y - 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
-					newWord, wordScore = self.checkWord(x, y, direction, False, trie, False)
+					newWord, wordScore = self.checkWord(x, y, 'down', False, trie, False)
 					if newWord is False:
-						return False, nextToTiles, score
+						return False, True, score
 					else:
 						nextToTiles = True
 						score = score + wordScore
 				# If tile below is not empty
 				elif self.board[int(y + 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
-					newWord, wordScore = self.checkWord(x, y, direction, True, trie, False)
+					newWord, wordScore = self.checkWord(x, y, 'down', True, trie, False)
 					if newWord is False:
-						return False, nextToTiles, score
+						return False, True, score
 					else:
 						nextToTiles = True
 						score = score + wordScore
 			else:
 				# If tile left and right is not empty
 				if self.board[int(y)][int(x - 1)] not in [None, 'DL', 'DW', 'TL', 'TW'] and self.board[int(y)][int(x + 1)] not in [None, 'DL', 'DW', 'TL', 'TW']:
-					newWord, wordScore = self.checkWord(x, y, direction, None, trie, False)
+					newWord, wordScore = self.checkWord(x, y, 'right', None, trie, False)
 					if newWord is False:
-						return False, nextToTiles, score
+						return False, True, score
 					else:
 						nextToTiles = True
 						score = score + wordScore
 				# If tile left is not empty
 				elif self.board[int(y)][int(x - 1)] not in [None, 'DL', 'DW', 'TL', 'TW']:
-					newWord, wordScore = self.checkWord(x, y, direction, False, trie, False)
+					newWord, wordScore = self.checkWord(x, y, 'right', False, trie, False)
 					if newWord is False:
-						return False, nextToTiles, score
+						return False, True, score
 					else:
 						nextToTiles = True
 						score = score + wordScore
 				# If tile right is not empty
 				elif self.board[int(y)][int(x + 1)] not in [None, 'DL', 'DW', 'TL', 'TW']:
-					newWord, wordScore = self.checkWord(x, y, direction, True, trie, False)
+					newWord, wordScore = self.checkWord(x, y, 'right', True, trie, False)
 					if newWord is False:
-						return False, nextToTiles, score
+						return False, True, score
 					else:
 						nextToTiles = True
 						score = score + wordScore
@@ -299,6 +298,15 @@ class Board:
 		# If at the end of tiles being added to the board check word is accepted
 		if len(letters) == 0:
 			newWord, wordScore = self.checkWord(x, y, direction, False, trie, True)
+
+			# If last tile placed is followed by another tile mark nextToTiles as true
+			if direction == 'right':
+				if self.board[int(y)][int(x + 1)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+					nextToTiles = True
+			else:
+				if self.board[int(y + 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+					nextToTiles = True
+
 			if newWord is False:
 				return False, nextToTiles, score + wordScore
 			else:
@@ -320,13 +328,28 @@ class Board:
 		# If placement is valid return score
 		# If placement is not valid return False and return board to previous state
 		boardBackup = copy.deepcopy(self.board)
+		nextToTiles = False
 
 		if len(word) is 7:
 			allLetters = True
 		else:
 			allLetters = False
 
-		allowed, nextToTiles, score = self.addLetters(word, x, y, direction, trie)
+		# If first tile placed is preceded by another tile mark nextToTiles as true
+		if direction == 'right':
+			if self.board[int(y)][int(x - 1)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				nextToTiles = True
+		else:
+			if self.board[int(y - 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				nextToTiles = True
+
+		allowed, nextToTilesReturn, score = self.addLetters(word, x, y, direction, trie)
+
+		if nextToTilesReturn:
+			nextToTiles = True
+
+		print(allowed)
+		print(nextToTiles)
 
 		if allowed is True and nextToTiles is True:
 			if allLetters:  # All letters placed bonus

@@ -191,7 +191,7 @@ if __name__ == '__main__':
 					else:
 						print("input not recognised")
 
-				print("Player " + str(game.active + 1) + " your score is " + str(player.score))
+				print("Player " + str(game.active + 1) + " you scored " + str(player.score))
 				# refill player letters
 				player.takeLetters(game.tiles)
 
