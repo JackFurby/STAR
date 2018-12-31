@@ -229,9 +229,13 @@ class Board:
 		# If tile is placed ontop of another move to next spot and try again
 		elif letterPlacement is -1:
 			if direction == 'right':
-				return self.addLetters(letters, x + 1, y, 'right')
+				acceptedReturn, nextToTileReturn, scoreReturn = self.addLetters(letters, x + 1, y, 'right', trie)
 			else:
-				return self.addLetters(letters, x, y + 1, 'down')
+				acceptedReturn, nextToTileReturn, scoreReturn = self.addLetters(letters, x, y + 1, 'down', trie)
+
+			if nextToTileReturn is True:
+				nextToTiles = True
+			return acceptedReturn, nextToTiles, score + scoreReturn
 		else:
 			del letters[0]  # tile placed. Remove from list
 
