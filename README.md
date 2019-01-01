@@ -103,7 +103,7 @@ def wordSearch(self, letters, currentNode=None):
 
 ## Environment
 
-STAR has a complete environment to represent Scrabble (WIP). It has various abilities with the current offerings being;
+STAR has a complete environment to represent Scrabble (WIP). It has various abilities with the current offerings being:
 
 ```
 
@@ -125,4 +125,10 @@ Over time some of these will be removed in order to only allow legal moves. Foll
 
 ### playTurn
 
-The option playTurn once created will allow the current active player to enter a word to place, starting position (X and Y) on the board and word direction (right or down). This input will be checked with the game rules and if legal will be played and the player updated with a new score and tiles. The environment will then move onto the next player.
+The option playTurn allowa the current active player to enter a word to place, starting position (X and Y) on the board and word direction (right or down). This input will be checked with the game rules and if legal will be played and the player updated with a new score and tiles. The environment will then move onto the next player. Once all tiles have been given to players and a player runs out of tiles the game will end. After each go the board will be updated and shown on the UI.
+
+### UI
+
+STAR has a basic UI. For now (and possibly always) the UI will only show the current board state. To interact with the enviroment you will need to use the command line interface.
+
+![alt text](https://github.com/JackFurby/STAR/blob/master/UI.png)
