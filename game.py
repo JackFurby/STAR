@@ -53,7 +53,7 @@ class Board:
 		self.board = [
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW'],
 					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
-					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
+					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
 					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
 					[None, None, None, None, 'DW', None, None, None, None, None, 'DW', None, None, None, None],
 					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None],
@@ -63,7 +63,7 @@ class Board:
 					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None],
 					[None, None, None, None, 'DW', None, None, None, None, None, 'DW', None, None, None, None],
 					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
-					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
+					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
 					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW']
 					]
@@ -107,7 +107,7 @@ class Board:
 
 			find = True
 			while find:
-				if self.board[int(y)][int(x)] in [None, 'DL', 'DW', 'TL', 'TW']:
+				if (x < 0 or y < 0) or self.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
 					if direction is 'right':
 						startY = y
 						startX = x + 1
@@ -126,7 +126,7 @@ class Board:
 
 			find = True
 			while find:
-				if self.board[int(y)][int(x)] in [None, 'DL', 'DW', 'TL', 'TW']:
+				if (x > 14 or y > 14) or self.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
 					if direction is 'right':
 						endY = y
 						endX = x - 1
@@ -145,12 +145,12 @@ class Board:
 
 			findStart = True
 			while findStart:
-				if self.board[int(y)][int(x)] in [None, 'DL', 'DW', 'TL', 'TW']:
+				if (x < 0 or y < 0) or self.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
 					if direction is 'right':
 						startY = y
 						startX = x + 1
 					else:
-						startY = y - 1
+						startY = y + 1
 						startX = x
 					x = middleX
 					y = middleY
@@ -163,7 +163,7 @@ class Board:
 
 			findEnd = True
 			while findEnd:
-				if self.board[int(y)][int(x)] in [None, 'DL', 'DW', 'TL', 'TW']:
+				if (x > 14 or y > 14) or self.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
 					if direction is 'right':
 						endY = y
 						endX = x - 1
@@ -246,7 +246,7 @@ class Board:
 			# If true the new word will be checked and return False if not valid
 			if direction == 'right':
 				# If tile above and below is not empty
-				if self.board[int(y - 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW'] and self.board[int(y + 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				if (x <= 14 and y - 1 >= 14) and self.board[y - 1][x] not in [None, 'DL', 'DW', 'TL', 'TW'] and (x <= 14 and y + 1 <= 14) and self.board[y + 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
 					newWord, wordScore = self.checkWord(x, y, 'down', None, trie, False)
 					if newWord is False:
 						return False, True, score
@@ -254,7 +254,7 @@ class Board:
 						nextToTiles = True
 						score = score + wordScore
 				# If tile above is not empty
-				elif self.board[int(y - 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				elif (x <= 14 and y - 1 >= 0) and self.board[y - 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
 					newWord, wordScore = self.checkWord(x, y, 'down', False, trie, False)
 					if newWord is False:
 						return False, True, score
@@ -262,7 +262,7 @@ class Board:
 						nextToTiles = True
 						score = score + wordScore
 				# If tile below is not empty
-				elif self.board[int(y + 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				elif (x <= 14 and y + 1 <= 14) and self.board[y + 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
 					newWord, wordScore = self.checkWord(x, y, 'down', True, trie, False)
 					if newWord is False:
 						return False, True, score
@@ -271,7 +271,7 @@ class Board:
 						score = score + wordScore
 			else:
 				# If tile left and right is not empty
-				if self.board[int(y)][int(x - 1)] not in [None, 'DL', 'DW', 'TL', 'TW'] and self.board[int(y)][int(x + 1)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				if (x - 1 <= 14 and y >= 0) and self.board[y][x - 1] not in [None, 'DL', 'DW', 'TL', 'TW'] and (x + 1 <= 14 and y <= 14) and self.board[y][x + 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
 					newWord, wordScore = self.checkWord(x, y, 'right', None, trie, False)
 					if newWord is False:
 						return False, True, score
@@ -279,7 +279,7 @@ class Board:
 						nextToTiles = True
 						score = score + wordScore
 				# If tile left is not empty
-				elif self.board[int(y)][int(x - 1)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				elif (x - 1 <= 14 and y >= 0) and self.board[y][x - 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
 					newWord, wordScore = self.checkWord(x, y, 'right', False, trie, False)
 					if newWord is False:
 						return False, True, score
@@ -287,7 +287,7 @@ class Board:
 						nextToTiles = True
 						score = score + wordScore
 				# If tile right is not empty
-				elif self.board[int(y)][int(x + 1)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				elif (x + 1 <= 14 and y <= 14) and self.board[y][x + 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
 					newWord, wordScore = self.checkWord(x, y, 'right', True, trie, False)
 					if newWord is False:
 						return False, True, score
@@ -297,14 +297,14 @@ class Board:
 
 		# If at the end of tiles being added to the board check word is accepted
 		if len(letters) == 0:
-			newWord, wordScore = self.checkWord(x, y, direction, False, trie, True)
+			newWord, wordScore = self.checkWord(x, y, direction, None, trie, True)
 
 			# If last tile placed is followed by another tile mark nextToTiles as true
 			if direction == 'right':
-				if self.board[int(y)][int(x + 1)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				if (x + 1 <= 14 and y <= 14) and self.board[y][x + 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
 					nextToTiles = True
 			else:
-				if self.board[int(y + 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				if (x <= 14 and y + 1 <= 14) and self.board[y + 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
 					nextToTiles = True
 
 			if newWord is False:
@@ -347,9 +347,6 @@ class Board:
 
 		if nextToTilesReturn:
 			nextToTiles = True
-
-		print(allowed)
-		print(nextToTiles)
 
 		if allowed is True and nextToTiles is True:
 			if allLetters:  # All letters placed bonus
