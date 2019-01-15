@@ -442,6 +442,11 @@ class Player:
 			if self.letters[i] is None:
 				self.letters[i] = gameLetters.takeLetter()
 
+	def swapLetters(self, game, swapTiles):
+		"""Swap refill player letters and add swapLetters back into board letters."""
+		self.takeLetters(game.tiles)
+		game.tiles.letters.extend(swapTiles)
+
 	def printLetters(self):
 		"""Print the current letters the player has to use."""
 		print(self.letters)

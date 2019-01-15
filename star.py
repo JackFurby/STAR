@@ -67,10 +67,7 @@ def update():
 		else:
 			print("No")
 	elif action == "findWords":
-		inputLetters = input("Enter letters ('?' is a wildcard): ")
-
-		# Makes sure input is in lower case
-		inputLetters = inputLetters.lower()
+		inputLetters = input("Enter letters ('?' is a wildcard): ").lower()
 
 		start = time.time()
 		wordList = trie.wordSearch(list(inputLetters))
@@ -136,8 +133,7 @@ def update():
 					while stillEntering:
 						selectedTile = numInput(input("Input a tile to replace (0 is the first tile, 6 is the last). Enter 7 to stop selection: "))
 						if selectedTile == 7:  # stop swapping tiles. All tiles in swapTiles are replaces
-							player.takeLetters(game.tiles)
-							game.tiles.letters.extend(swapTiles)
+							player.swapLetters(game, swapTiles)
 							stillEntering = False
 						elif selectedTile >= 0 and selectedTile <= 6:
 							if player.letters[selectedTile] is None:
