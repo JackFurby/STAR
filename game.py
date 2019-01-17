@@ -44,6 +44,23 @@ class Game:
 		else:
 			self.active = self.active + 1
 
+	def possibleMoves(self, player, trie):
+		"""Return all possible moves a given player can make with the current board and player tiles."""
+		# If board is empty return words from players tiles in all posible moves
+		if self.board.playedTiles == 0:
+			words = trie.wordSearch(player.letters)
+			moves = []
+			# Get all moves (all words and placements)
+			for word in words:
+				for x in range(len(word[0])):
+					moves.append([word, 7 - x, 7, 'right'])  # [word + score, x, y, direction]
+				for y in range(len(word[0])):
+					moves.append([word, 7, 7 - y, 'down'])
+			return moves
+		# If there are tiles on the board include them in the possible moves
+		else:
+			pass
+
 
 class Board:
 	"""Scrabble board."""
