@@ -251,7 +251,7 @@ def update():
 		print("\q		-	Exit STAR")
 		print("isAccepted	-	Enter a single word to find out if it is accepted or not")
 		print("findWords	-	Find all words you can make with a given set of characters")
-		print("findMoves	-	Find all words you can make with a given set of characters and the board")
+		print("findMoves	-	Find all words you can make with a given player and the board")
 		print("board		-	Display the current state of the board")
 		print("addLetter	-	Add a letter to the board")
 		print("letters		-	Display the current letters available to take")
