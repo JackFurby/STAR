@@ -109,7 +109,7 @@ STAR has a complete environment to represent Scrabble (WIP). It has various abil
 
 isAccepted	-	Enter a single word to find out if it is accepted or not
 findWords	-	Find all words you can make with a given set of characters
-findMoves	-	Find all words you can make with a given set of characters and the board
+findMoves	-	Find all words you can make with a given player and the board
 board		-	Display the current state of the board
 addLetter	-	Add a letter to the board
 letters		-	Display the current letters available to take
