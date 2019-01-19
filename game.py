@@ -61,6 +61,29 @@ class Game:
 		else:
 			pass
 
+			# ========= some notes on how to find all possible moves =========
+
+			"""
+
+			Getting a list of all possible moves ranked on score could take a long time. For that reason
+			some clever method will have to be used in order to minimise the amount of time. The following
+			is some notes from reading papers and questions online although this solution is not exactly
+			the same as any I could find.
+
+			1. For every word currently in play on the board (keep this info stored in a list?) do the following
+				1a. Check if tiles can be added to the start, end or both of the word to make a new word
+				1b. Check if a new word can be created by placing a word perpendicular to the word on the board
+					- Use each character of the word on the board as an ancor for the first, middle and end
+					  letter in a new word
+					- If a new word can be made from (1a) then also check the new tiles
+					- Using the list of words that can be made by the players tiles can any be placed in parallel to
+					  the word on the board
+					- Take into concideration if another word on the board connects to the new tiles (does this stop the new word?)
+				1c. Every time a legal move is found add it to a list
+			2. Once all words are checked return the list of passible moves and the score they get
+
+			"""
+
 
 class Board:
 	"""Scrabble board."""
