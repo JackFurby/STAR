@@ -108,6 +108,7 @@ class Board:
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW']
 					]
 		self.playedTiles = 0
+		self.words = []
 
 	def addLetter(self, letter, value, x, y):
 		"""Add a letter to the board specifying x and y position."""
@@ -366,8 +367,9 @@ class Board:
 		"""Add a word to the board specifying the x and y position of the first tile."""
 		# Check if the word placement is valid
 		# If placement is valid return score
-		# If placement is not valid return False and return board to previous state
+		# If placement is not valid return False and return environment to previous state
 		boardBackup = copy.deepcopy(self.board)
+		playedTilesBackup = copy.deepcopy(self.playedTiles)
 		nextToTiles = False
 
 		if len(word) is 7:
@@ -394,6 +396,7 @@ class Board:
 			return True, score
 		else:
 			self.board = boardBackup
+			self.playedTiles = playedTilesBackup
 			return False, score
 
 	def printBoard(self):
