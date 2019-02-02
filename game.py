@@ -59,7 +59,20 @@ class Game:
 			return moves
 		# If there are tiles on the board include them in the possible moves
 		else:
-			pass
+			startingPos = []
+
+			# Search the board for empty positions next to tiles in play
+			for y in range(len(self.board.board)):
+				for x in range(len(self.board.board[y])):
+					# If current position in empty and next to a tile in play add it to list
+					if self.board.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
+						if self.board.board[y - 1][x] not in [None, 'DL', 'DW', 'TL', 'TW'] or (y + 1 <= len(self.board.board) - 1 and self.board.board[y + 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']):
+							startingPos.append([x, y])
+						elif self.board.board[y][x - 1] not in [None, 'DL', 'DW', 'TL', 'TW'] or (x + 1 <= len(self.board.board[y]) - 1 and self.board.board[y][x + 1] not in [None, 'DL', 'DW', 'TL', 'TW']):
+							startingPos.append([x, y])
+
+			return startingPos
+
 
 			# ========= some notes on how to find all possible moves =========
 
@@ -108,7 +121,6 @@ class Board:
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW']
 					]
 		self.playedTiles = 0
-		self.words = []
 
 	def addLetter(self, letter, value, x, y):
 		"""Add a letter to the board specifying x and y position."""
@@ -251,8 +263,6 @@ class Board:
 		wordScore = wordScore * multiplierTotal  # Apply word multiplier
 
 		if trie.hasWord(word.lower()):
-			# If word is accepted add it to words (startLocation, endLocation, direction)
-			self.words.append([[startX, startY], [endX, endY], direction])
 			return True, wordScore
 		else:
 			# If word is a single tile down count it (single tile words are not counted as words)
@@ -369,14 +379,14 @@ class Board:
 				nextToTiles = True
 			return acceptedReturn, nextToTiles, score + scoreReturn
 
-	def addWord(self, word, x, y, direction, trie):
+	def addWord(self, word, x, y, direction, trie, player):
 		"""Add a word to the board specifying the x and y position of the first tile."""
 		# Check if the word placement is valid
 		# If placement is valid return score
 		# If placement is not valid return False and return environment to previous state
 		boardBackup = copy.deepcopy(self.board)
 		playedTilesBackup = copy.deepcopy(self.playedTiles)
-		wordsBackup = copy.deepcopy(self.words)
+		playerLettersBackup = copy.deepcopy(player.letters)
 		nextToTiles = False
 
 		if self.playedTiles == 0 and len(word) == 1:
@@ -407,7 +417,7 @@ class Board:
 		else:
 			self.board = boardBackup
 			self.playedTiles = playedTilesBackup
-			self.words = wordsBackup
+			player.letters = playerLettersBackup
 			return False, score
 
 	def printBoard(self):

@@ -201,7 +201,7 @@ def update():
 							print("Input not recognised")
 
 						# Verify word placement is valid and play it if it is
-						tilesAdded, score = game.board.addWord(word, x, y, direction, trie)
+						tilesAdded, score = game.board.addWord(word, x, y, direction, trie, player)
 						if tilesAdded:
 							# Word accepted. End turn and update score
 							turn = False
@@ -210,7 +210,6 @@ def update():
 						else:
 							# Word not accepeted. Reset player and try again
 							print("Input not accepted")
-							player.letters = playerBackup
 					else:
 						print("No tiles selected. Turn skipped")
 						turn = False
