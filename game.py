@@ -64,12 +64,14 @@ class Game:
 			# Search the board for empty positions next to tiles in play
 			for y in range(len(self.board.board)):
 				for x in range(len(self.board.board[y])):
-					# If current position in empty and next to a tile in play add it to list
-					if self.board.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
-						if self.board.board[y - 1][x] not in [None, 'DL', 'DW', 'TL', 'TW'] or (y + 1 <= len(self.board.board) - 1 and self.board.board[y + 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']):
-							startingPos.append([x, y])
-						elif self.board.board[y][x - 1] not in [None, 'DL', 'DW', 'TL', 'TW'] or (x + 1 <= len(self.board.board[y]) - 1 and self.board.board[y][x + 1] not in [None, 'DL', 'DW', 'TL', 'TW']):
-							startingPos.append([x, y])
+					# If current position is empty and next to a tile in play add it to list with direction a new word would have to go
+					nextToTile, right, left, up, down = self.board.nextToTiles(x, y)
+					if nextToTile:
+						startingPos.append([x, y, right, left, up, down])
+
+			# For every point in starting possitions, evaluate it and work out possible words and scores
+			for point in startingPos:
+				pass
 
 			return startingPos
 
@@ -83,17 +85,10 @@ class Game:
 			is some notes from reading papers and questions online although this solution is not exactly
 			the same as any I could find.
 
-			1. For every word currently in play on the board (keep this info stored in a list?) do the following
-				1a. Check if tiles can be added to the start, end or both of the word to make a new word
-				1b. Check if a new word can be created by placing a word perpendicular to the word on the board
-					- Use each character of the word on the board as an ancor for the first, middle and end
-					  letter in a new word
-					- If a new word can be made from (1a) then also check the new tiles
-					- Using the list of words that can be made by the players tiles can any be placed in parallel to
-					  the word on the board
-					- Take into concideration if another word on the board connects to the new tiles (does this stop the new word?)
-				1c. Every time a legal move is found add it to a list
-			2. Once all words are checked return the list of passible moves and the score they get
+			1. Get a list of all free spaces on the board next to a tile(s)
+			2. For each space in list generate all possible moves
+				* Build on trie to take anker tiles(s) - right and left
+				* start with just 2 letter words and build up to use all played tiles (take into concideration other tiles on the board)
 
 			"""
 
@@ -121,6 +116,34 @@ class Board:
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW']
 					]
 		self.playedTiles = 0
+
+	def nextToTiles(self, x, y):
+		"""Given a grid location this will return if there are surrounding tiles and which ones they are."""
+		nextToTile = False
+		left = False
+		right = False
+		up = False
+		down = False
+
+		# only complete search if current position is empty
+		if self.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
+			if x - 1 >= 0 and self.board[y][x - 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				nextToTile = True
+				left = True
+
+			if x + 1 <= len(self.board[y]) - 1 and self.board[y][x + 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				nextToTile = True
+				right = True
+
+			if y - 1 >= 0 and self.board[y - 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				nextToTile = True
+				up = True
+
+			if y + 1 <= len(self.board) - 1 and self.board[y + 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				nextToTile = True
+				down = True
+
+		return nextToTile, left, right, up, down
 
 	def addLetter(self, letter, value, x, y):
 		"""Add a letter to the board specifying x and y position."""
@@ -386,7 +409,6 @@ class Board:
 		# If placement is not valid return False and return environment to previous state
 		boardBackup = copy.deepcopy(self.board)
 		playedTilesBackup = copy.deepcopy(self.playedTiles)
-		playerLettersBackup = copy.deepcopy(player.letters)
 		nextToTiles = False
 
 		if self.playedTiles == 0 and len(word) == 1:
@@ -417,7 +439,6 @@ class Board:
 		else:
 			self.board = boardBackup
 			self.playedTiles = playedTilesBackup
-			player.letters = playerLettersBackup
 			return False, score
 
 	def printBoard(self):

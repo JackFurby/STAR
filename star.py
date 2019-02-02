@@ -3,6 +3,7 @@ import time
 from game import Board, Tiles, Game
 from setup import setup, letterScore, getScore, save_trie, load_trie
 from trie import Trie, Node
+import copy
 
 import pygame
 import sys
@@ -161,7 +162,7 @@ def update():
 				elif playOption == '3':
 					# Player places 1 or more tiles
 					word = []  # List of tiles to play with score (in order)
-					playerBackup = player.letters.copy()  # backup of player tiles incase input is not accepted
+					playerBackup = copy.deepcopy(player.letters)  # backup of player tiles incase input is not accepted
 					stillEntering = True
 					while stillEntering:
 						selectedTile = numInput(input("Input a tile to use in order (0 is the first tile, 6 is the last). Enter 7 to stop selection: "))
@@ -209,6 +210,7 @@ def update():
 							print("Player " + str(game.active + 1) + " you scored " + str(score))
 						else:
 							# Word not accepeted. Reset player and try again
+							player.letters = playerBackup
 							print("Input not accepted")
 					else:
 						print("No tiles selected. Turn skipped")
