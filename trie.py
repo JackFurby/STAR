@@ -67,7 +67,7 @@ class Trie:
 		# if word found then add it to words
 		if currentNode.end:
 			# only add word and word score to words list
-						words.append([currentNode.data[0], currentNode.data[1]])
+			words.append([currentNode.data[0], currentNode.data[1]])
 
 		if len(letters) is not 0:
 			# i keeps track of current letter
@@ -91,3 +91,21 @@ class Trie:
 
 		# return words found
 		return words
+
+	def contains(self, letters, contains, currentNode=None):
+		"""Given a list of letters find all words that can be made containing a string."""
+		pass
+
+	def prefix(self, letters, prefix, currentNode=None):
+		"""Given a list of letters find all words that can be made begining with a string."""
+		if currentNode is None:
+			currentNode = self.head
+
+		for char in prefix:
+			currentNode = currentNode.children[char]
+
+		return self.wordSearch(letters, currentNode)
+
+	def suffix(self, letters, suffix, currentNode=None):
+		"""Given a list of letters find all words that can be made ending with a string."""
+		pass
