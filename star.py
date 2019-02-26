@@ -86,6 +86,16 @@ def update():
 		print(*wordList, sep='\n')
 		end = time.time()
 		print("Completed search in", end - start, 'seconds')
+	elif action == "findWordsSuffix":
+		suffixLetters = input("Enter suffix (in order): ").lower()
+		inputLetters = input("Enter letters ('?' is a wildcard): ").lower()
+
+		start = time.time()
+		wordList = trie.suffix(list(inputLetters), suffixLetters)
+		wordList.sort(key=lambda tup: -tup[1])
+		print(*wordList, sep='\n')
+		end = time.time()
+		print("Completed search in", end - start, 'seconds')
 	elif action == "findMoves":
 		player = game.players[numInput(input("Enter player number: ")) - 1]
 		start = time.time()
@@ -263,6 +273,7 @@ def update():
 		print("isAccepted	-	Enter a single word to find out if it is accepted or not")
 		print("findWords	-	Find all words you can make with a given set of characters")
 		print("findWordsPrefix	-	Find all words you can make with a given set of characters + a prefix")
+		print("findWordsSuffix	-	Find all words you can make with a given set of characters + a suffix")
 		print("findMoves	-	Find all words you can make with a given player and the board")
 		print("board		-	Display the current state of the board")
 		print("addLetter	-	Add a letter to the board")
