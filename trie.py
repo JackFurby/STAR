@@ -92,9 +92,60 @@ class Trie:
 		# return words found
 		return words
 
+	def containsTemp(self, letters, currentNode=None, contains=False):
+		# list of all words found
+		words = []
+
+		if currentNode is None:
+			currentNode = self.head
+
+		# if word found then add it to words
+		if currentNode.end and contains:
+			# only add word and word score to words list
+			words.append([currentNode.data[0], currentNode.data[1]])
+
+		if len(letters) is not 0:
+			# i keeps track of current letter
+			# searched stop duplicate searches if input has repeated letters
+			i = 0
+			searched = []
+			for letter in letters:
+				if letter not in searched:
+					searched.append(letter)
+					containsTrue = True
+					if len(letter) > 1:
+						# Apply suffix to search
+						containsNode = currentNode
+						for char in letter:
+							if char in containsNode.children:
+								containsNode = containsNode.children[char]
+							else:
+								# If suffix is not accepted then apply this
+								containsTrue = False
+						if containsTrue:
+							newLetters = letters.copy()
+							del newLetters[i]
+							words += self.containsTemp(newLetters, containsNode, containsTrue)
+					# if wildcard played then look at all children
+					elif letter == '?' and containsTrue:
+						for char in currentNode.children:
+							newLetters = letters.copy()
+							del newLetters[i]
+							words += self.containsTemp(newLetters, currentNode.children[char], contains)
+					elif letter in currentNode.children and containsTrue:
+						newLetters = letters.copy()
+						del newLetters[i]
+						words += self.containsTemp(newLetters, currentNode.children[letter], contains)
+
+				i += 1
+
+		# return words found
+		return words
+
 	def contains(self, letters, contains, currentNode=None):
 		"""Given a list of letters find all words that can be made containing a string."""
-		pass
+		letters.append(contains)
+		return self.containsTemp(letters)
 
 	def prefix(self, letters, prefix, currentNode=None):
 		"""Given a list of letters find all words that can be made begining with a string."""
