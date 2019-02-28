@@ -91,7 +91,7 @@ def update():
 		inputLetters = input("Enter letters ('?' is a wildcard): ").lower()
 
 		start = time.time()
-		wordList = trie.suffix(list(inputLetters), suffixLetters)
+		wordList = trie.wordSearch(list(inputLetters), suffix=suffixLetters)
 		wordList.sort(key=lambda tup: -tup[1])
 		print(*wordList, sep='\n')
 		end = time.time()

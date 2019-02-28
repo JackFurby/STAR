@@ -56,7 +56,7 @@ class Trie:
 		else:
 			return True
 
-	def wordSearch(self, letters, currentNode=None):
+	def wordSearch(self, letters, suffix=None, currentNode=None):
 		"""Given a list of letters find all words that can be made."""
 		# list of all words found
 		words = []
@@ -64,10 +64,28 @@ class Trie:
 		if currentNode is None:
 			currentNode = self.head
 
-		# if word found then add it to words
-		if currentNode.end:
-			# only add word and word score to words list
-			words.append([currentNode.data[0], currentNode.data[1]])
+		# If suffix is set apply suffix to search
+		if suffix is not None:
+			suffixNode = currentNode
+			suffixTrue = True
+			for char in suffix:
+				if char in suffixNode.children:
+					suffixNode = suffixNode.children[char]
+				else:
+					# If suffix is not accepted then apply this
+					suffixTrue = False
+
+			# if word found and suffix accepted then add it to words
+			if suffixNode.end and suffixTrue:
+				# only add word and word score to words list
+				words.append([suffixNode.data[0], suffixNode.data[1]])
+
+		# Regualr word search
+		else:
+			# if word found then add it to words
+			if currentNode.end:
+				# only add word and word score to words list
+				words.append([currentNode.data[0], currentNode.data[1]])
 
 		if len(letters) is not 0:
 			# i keeps track of current letter
@@ -82,11 +100,21 @@ class Trie:
 						for char in currentNode.children:
 							newLetters = letters.copy()
 							del newLetters[i]
-							words += self.wordSearch(newLetters, currentNode.children[char])
+							# Suffix word search
+							if suffix is not None:
+								words += self.wordSearch(newLetters, suffix=suffix, currentNode=currentNode.children[char])
+							# Regualr word search
+							else:
+								words += self.wordSearch(newLetters, currentNode=currentNode.children[char])
 					elif letter in currentNode.children:
 						newLetters = letters.copy()
 						del newLetters[i]
-						words += self.wordSearch(newLetters, currentNode.children[letter])
+						# Suffix word search
+						if suffix is not None:
+							words += self.wordSearch(newLetters, suffix=suffix, currentNode=currentNode.children[letter])
+						# Regualr word search
+						else:
+							words += self.wordSearch(newLetters, currentNode=currentNode.children[letter])
 				i += 1
 
 		# return words found
@@ -158,49 +186,3 @@ class Trie:
 
 		# move over to regular wordSearch (with prefix in place)
 		return self.wordSearch(letters, currentNode)
-
-	def suffix(self, letters, suffix, currentNode=None):
-		"""Given a list of letters find all words that can be made ending with a string."""
-		# list of all words found
-		words = []
-
-		if currentNode is None:
-			currentNode = self.head
-
-		# Apply suffix to search
-		suffixNode = currentNode
-		suffixTrue = True
-		for char in suffix:
-			if char in suffixNode.children:
-				suffixNode = suffixNode.children[char]
-			else:
-				# If suffix is not accepted then apply this
-				suffixTrue = False
-
-		# if word found and suffix accepted then add it to words
-		if suffixNode.end and suffixTrue:
-			# only add word and word score to words list
-			words.append([suffixNode.data[0], suffixNode.data[1]])
-
-		if len(letters) is not 0:
-			# i keeps track of current letter
-			# searched stop duplicate searches if input has repeated letters
-			i = 0
-			searched = []
-			for letter in letters:
-				if letter not in searched:
-					searched.append(letter)
-					# if wildcard played then look at all children
-					if letter == '?':
-						for char in currentNode.children:
-							newLetters = letters.copy()
-							del newLetters[i]
-							words += self.suffix(newLetters, suffix, currentNode.children[char])
-					elif letter in currentNode.children:
-						newLetters = letters.copy()
-						del newLetters[i]
-						words += self.suffix(newLetters, suffix, currentNode.children[letter])
-				i += 1
-
-		# return words found
-		return words
