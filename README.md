@@ -127,7 +127,7 @@ activePlayer		-	Print the current active player
 
 ```
 
-Over time some of these will be removed in order to only allow legal moves. Following from the data structure section of this project isAccepted and findWords allow interaction with the word trie. All other actions will interact with the game environment.
+Over time some of these will be removed in order to only allow legal moves. Following from the data structure section of this project isAccepted, findWords, findWordsPrefix, findWordsSuffix and findWordsContains allow interaction with the word trie. All other actions will interact with the game environment.
 
 
 ### playTurn
