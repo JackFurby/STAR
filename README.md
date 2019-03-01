@@ -112,7 +112,7 @@ isAccepted		-	Enter a single word to find out if it is accepted or not
 findWords		-	Find all words you can make with a given set of characters
 findWordsPrefix		-	Find all words you can make with a given set of characters + a prefix
 findWordsSuffix		-	Find all words you can make with a given set of characters + a suffix
-findWordsContains	-	Find all words you can make with a given set of characters + a suffix
+findWordsContains	-	Find all words you can make with a given set of characters + a set string
 findMoves		-	Find all words you can make with a given player and the board
 board			-	Display the current state of the board
 addLetter		-	Add a letter to the board
