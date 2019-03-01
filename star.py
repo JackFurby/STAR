@@ -284,7 +284,7 @@ def update():
 		print("findWords		-	Find all words you can make with a given set of characters")
 		print("findWordsPrefix		-	Find all words you can make with a given set of characters + a prefix")
 		print("findWordsSuffix		-	Find all words you can make with a given set of characters + a suffix")
-		print("findWordsContains	-	Find all words you can make with a given set of characters + a suffix")
+		print("findWordsContains	-	Find all words you can make with a given set of characters + a set string")
 		print("findMoves		-	Find all words you can make with a given player and the board")
 		print("board			-	Display the current state of the board")
 		print("addLetter		-	Add a letter to the board")
