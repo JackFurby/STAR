@@ -107,17 +107,21 @@ STAR has a complete environment to represent Scrabble (WIP). It has various abil
 
 ```
 
-isAccepted	-	Enter a single word to find out if it is accepted or not
-findWords	-	Find all words you can make with a given set of characters
-findMoves	-	Find all words you can make with a given player and the board
-board		-	Display the current state of the board
-addLetter	-	Add a letter to the board
-letters		-	Display the current letters available to take
-makePlayer	-	Makes a new player (max 4)
-takeLetters	-	Fills up a specified players letters
-playerLetters	-	Prints the letters a given player has
-playTurn	-	Make a move for the current players turn
-activePlayer	-	Print the current active player
+\q			-	Exit STAR
+isAccepted		-	Enter a single word to find out if it is accepted or not
+findWords		-	Find all words you can make with a given set of characters
+findWordsPrefix		-	Find all words you can make with a given set of characters + a prefix
+findWordsSuffix		-	Find all words you can make with a given set of characters + a suffix
+findWordsContains	-	Find all words you can make with a given set of characters + a suffix
+findMoves		-	Find all words you can make with a given player and the board
+board			-	Display the current state of the board
+addLetter		-	Add a letter to the board
+letters			-	Display the current letters available to take
+makePlayer		-	Makes a new player (max 4)
+takeLetters		-	Fills up a specified players letters
+playerLetters		-	Prints the letters a given player has
+playTurn		-	Make a move for the current players turn
+activePlayer		-	Print the current active player
 
 ```
 

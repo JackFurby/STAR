@@ -56,8 +56,8 @@ class Trie:
 		else:
 			return True
 
-	def wordSearch(self, letters, suffix=None, currentNode=None):
-		"""Given a list of letters find all words that can be made."""
+	def wordSearch(self, letters, suffix=None, contains=False, containsSet=False, currentNode=None):
+		"""Given a list of letters find all words that can be made (with optional extra components)."""
 		# list of all words found
 		words = []
 
@@ -74,12 +74,16 @@ class Trie:
 				else:
 					# If suffix is not accepted then apply this
 					suffixTrue = False
-
 			# if word found and suffix accepted then add it to words
 			if suffixNode.end and suffixTrue:
 				# only add word and word score to words list
 				words.append([suffixNode.data[0], suffixNode.data[1]])
-
+		# In contains has been set then make sure contains is true before seeing if word exists
+		elif containsSet:
+			if contains:
+				if currentNode.end:
+					# only add word and word score to words list
+					words.append([currentNode.data[0], currentNode.data[1]])
 		# Regualr word search
 		else:
 			# if word found then add it to words
@@ -95,8 +99,22 @@ class Trie:
 			for letter in letters:
 				if letter not in searched:
 					searched.append(letter)
+					containsTrue = True
+					# Apply contains to search
+					if len(letter) > 1:
+						containsNode = currentNode
+						for char in letter:
+							if char in containsNode.children:
+								containsNode = containsNode.children[char]
+							else:
+								# If contains string is not accepted then apply this
+								containsTrue = False
+						if containsTrue:
+							newLetters = letters.copy()
+							del newLetters[i]
+							words += self.wordSearch(newLetters, suffix=suffix, contains=containsTrue, containsSet=True, currentNode=containsNode)
 					# if wildcard played then look at all children
-					if letter == '?':
+					elif letter == '?':
 						for char in currentNode.children:
 							newLetters = letters.copy()
 							del newLetters[i]
@@ -105,7 +123,7 @@ class Trie:
 								words += self.wordSearch(newLetters, suffix=suffix, currentNode=currentNode.children[char])
 							# Regualr word search
 							else:
-								words += self.wordSearch(newLetters, currentNode=currentNode.children[char])
+								words += self.wordSearch(newLetters, contains=contains, containsSet=containsSet, currentNode=currentNode.children[char])
 					elif letter in currentNode.children:
 						newLetters = letters.copy()
 						del newLetters[i]
@@ -114,57 +132,7 @@ class Trie:
 							words += self.wordSearch(newLetters, suffix=suffix, currentNode=currentNode.children[letter])
 						# Regualr word search
 						else:
-							words += self.wordSearch(newLetters, currentNode=currentNode.children[letter])
-				i += 1
-
-		# return words found
-		return words
-
-	def containsTemp(self, letters, currentNode=None, contains=False):
-		# list of all words found
-		words = []
-
-		if currentNode is None:
-			currentNode = self.head
-
-		# if word found then add it to words
-		if currentNode.end and contains:
-			# only add word and word score to words list
-			words.append([currentNode.data[0], currentNode.data[1]])
-
-		if len(letters) is not 0:
-			# i keeps track of current letter
-			# searched stop duplicate searches if input has repeated letters
-			i = 0
-			searched = []
-			for letter in letters:
-				if letter not in searched:
-					searched.append(letter)
-					containsTrue = True
-					if len(letter) > 1:
-						# Apply suffix to search
-						containsNode = currentNode
-						for char in letter:
-							if char in containsNode.children:
-								containsNode = containsNode.children[char]
-							else:
-								# If suffix is not accepted then apply this
-								containsTrue = False
-						if containsTrue:
-							newLetters = letters.copy()
-							del newLetters[i]
-							words += self.containsTemp(newLetters, containsNode, containsTrue)
-					# if wildcard played then look at all children
-					elif letter == '?' and containsTrue:
-						for char in currentNode.children:
-							newLetters = letters.copy()
-							del newLetters[i]
-							words += self.containsTemp(newLetters, currentNode.children[char], contains)
-					elif letter in currentNode.children and containsTrue:
-						newLetters = letters.copy()
-						del newLetters[i]
-						words += self.containsTemp(newLetters, currentNode.children[letter], contains)
-
+							words += self.wordSearch(newLetters, contains=contains, containsSet=containsSet, currentNode=currentNode.children[letter])
 				i += 1
 
 		# return words found
@@ -173,7 +141,7 @@ class Trie:
 	def contains(self, letters, contains, currentNode=None):
 		"""Given a list of letters find all words that can be made containing a string."""
 		letters.append(contains)
-		return self.containsTemp(letters)
+		return self.wordSearch(letters, containsSet=True)
 
 	def prefix(self, letters, prefix, currentNode=None):
 		"""Given a list of letters find all words that can be made begining with a string."""
