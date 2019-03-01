@@ -64,9 +64,11 @@ def addWord(self, word):
 
 ## Finding all words from a list
 
-wordSearch will recursively call itself and on each call will check to see if the current node is the end of a word. To make sure the same path is not searched twice a list of current letters searched is kept. If a letter is already present in this then that letter is skipped.
+wordSearch will recursively call itself and on each call will check to see if the current node is the end of a word. To make sure the same path is not searched twice a list of current letters searched is kept. If a letter is already present in this then that letter is skipped. The method here is not perfect and if you enter a wild card then you may get duplicates in your result
 
 Given a list of characters wordSearch will return a list of all words that can be created with them.
+
+This function has also been extended (not shown here) to accept a prefix, suffix or an extra string that must be included in the results.
 
 ```Python
 
