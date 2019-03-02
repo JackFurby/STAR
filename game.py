@@ -85,10 +85,11 @@ class Game:
 			is some notes from reading papers and questions online although this solution is not exactly
 			the same as any I could find.
 
-			1. Get a list of all free spaces on the board next to a tile(s)
+			1. Get a list of all free spaces on the board next to a tile(s) - DONE
 			2. For each space in list generate all possible moves
-				* Build on trie to take anker tiles(s) - right and left
-				* start with just 2 letter words and build up to use all played tiles (take into concideration other tiles on the board)
+				* attempt to find words perpendicular to word on board next to free space
+				* Work out the max lengh of word that can fit without hitting another
+				* run through findWords with requirements (probably use a modifed version of contains)
 
 			"""
 
