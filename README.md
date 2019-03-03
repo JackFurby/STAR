@@ -139,3 +139,13 @@ The option playTurn allowa the current active player to enter a word to place, s
 STAR has a basic UI. For now (and possibly always) the UI will only show the current board state. To interact with the enviroment you will need to use the command line interface.
 
 ![alt text](https://github.com/JackFurby/STAR/blob/master/UI.png)
+
+### findMoves
+
+Find moves will return all playable moves a player can make taking into consideration their tiles in their rack and the current state of the board. Some basic notes about how to do this are as follows:
+
+* Scan the board looking for starting positions (positions next to tiles that have already been played)
+	* For each stating position add one tile from the players rack at a time in the direction of the tile that the position is next to (extending the current tile). Each time a word is found take note of it.
+	* By doing this we can also find moves using multiple tiles that have already been played and ensure if multiple words have been played they are still accepted.
+	
+findMoves was based of the algorithem used in [The World’s Fastest Scrabble Program](http://www.cs.cmu.edu/afs/cs/academic/class/15451-s06/www/lectures/scrabble.pdf).
