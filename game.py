@@ -65,11 +65,6 @@ class Game:
 
 		nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y)
 
-		print("3: ", self.board.board[y][x])
-		print("4: ", self.board.board[y][x + 1])
-		print("Right: ", right)
-		print("Down: ", down)
-
 		if direction == 'right':
 			nextSpace = right
 		else:
@@ -223,8 +218,6 @@ class Board:
 		if x + 1 <= len(self.board[y]) - 1:
 			rightEnd = False
 			if self.board[y][x + 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
-				print("1: ", self.board[y][x])
-				print("2: ",self.board[y][x + 1])
 				nextToTile = True
 				right = True
 			else:
