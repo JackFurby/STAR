@@ -44,12 +44,86 @@ class Game:
 		else:
 			self.active = self.active + 1
 
+	def extendLeft(self, x, y, direction, letters, trie, currentNode=None):
+		"""Return moves that can be made given a starting position, player and direction."""
+		# list of all words found
+		words = []
+
+		if currentNode is None:
+			currentNode = trie.head
+
+		# if word found then add it to words
+		if currentNode.end:
+			if direction == 'right':
+				startX = x - len(currentNode.data[0])
+				startY = y
+			else:
+				startX = x
+				startY = y - len(currentNode.data[0]) + 1
+
+			words.append([currentNode.data, startX, startY, direction])
+
+		nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y)
+
+		print("3: ", self.board.board[y][x])
+		print("4: ", self.board.board[y][x + 1])
+		print("Right: ", right)
+		print("Down: ", down)
+
+		if direction == 'right':
+			nextSpace = right
+		else:
+			nextSpace = down
+
+		if nextSpace:
+			if direction == 'right':
+				letter = self.board.board[y][x + 1]
+				nextX = x + 1
+				nextY = y
+			else:
+				letter = self.board.board[y + 1][x]
+				nextX = x
+				nextY = y + 1
+			print(letter)
+			if letter[0] in currentNode.children:
+				newLetters = letters.copy()
+				words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[letter[0]])
+		elif len(letters) is not 0:
+			if direction == 'right':
+				boardEnd = rightEnd
+				nextX = x + 1
+				nextY = y
+			else:
+				boardEnd = downEnd
+				nextX = x
+				nextY = y + 1
+			if boardEnd is not True:
+				# i keeps track of current letter
+				# searched stop duplicate searches if input has repeated letters
+
+																							#<<<<<<< Need to add check if other direction is changed
+
+				i = 0
+				searched = []
+				for letter in letters:
+					if letter not in searched:
+						searched.append(letter)
+						if letter in currentNode.children:
+							newLetters = letters.copy()
+							del newLetters[i]
+							words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[letter])
+					i += 1
+
+		# return words found
+		return words
+
 	def possibleMoves(self, player, trie):
 		"""Return all possible moves a given player can make with the current board and player tiles."""
 		# If board is empty return words from players tiles in all posible moves
+		moves = []
+
 		if self.board.playedTiles == 0:
 			words = trie.wordSearch(player.letters)
-			moves = []
 			# Get all moves (all words and placements)
 			for word in words:
 				for x in range(len(word[0])):
@@ -59,21 +133,26 @@ class Game:
 			return moves
 		# If there are tiles on the board include them in the possible moves
 		else:
-			startingPos = []
-
 			# Search the board for empty positions next to tiles in play
 			for y in range(len(self.board.board)):
 				for x in range(len(self.board.board[y])):
 					# If current position is empty and next to a tile in play add it to list with direction a new word would have to go
-					nextToTile, right, left, up, down = self.board.nextToTiles(x, y)
-					if nextToTile:
-						startingPos.append([x, y, right, left, up, down])
+					if self.board.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
+						nextToTile, right, left, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y)
+						if nextToTile:
+							if right:  # Need to work on this (extendRight)
+								pass
 
-			# For every point in starting possitions, evaluate it and work out possible words and scores
-			for point in startingPos:
-				pass
+							if left:
+								moves += self.extendLeft(x - 1, y, 'right', player.letters, trie)
 
-			return startingPos
+							if up:  # Need to work on this (extendRight)
+								pass
+
+							if down:
+								moves += self.extendLeft(x, y - 1, 'down', player.letters, trie)
+
+			return moves
 
 
 			# ========= some notes on how to find all possible moves =========
@@ -120,31 +199,53 @@ class Board:
 
 	def nextToTiles(self, x, y):
 		"""Given a grid location this will return if there are surrounding tiles and which ones they are."""
+		# nextToTile will be true if the position being searched is next to another tile
+		# left, right, up and down will be true if there is a tile in that direction of the position
+		# leftEnd, rightEnd, upEnd and downEnd will be true if the position being searched is next to the end of the board (in that direction)
 		nextToTile = False
-		left = False
-		right = False
 		up = False
+		upEnd = False
 		down = False
+		downEnd = False
 
-		# only complete search if current position is empty
-		if self.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
-			if x - 1 >= 0 and self.board[y][x - 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
+		# If the tile to the left of the input is on the board
+		if x - 1 >= 0:
+			leftEnd = False
+			if self.board[y][x - 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
 				nextToTile = True
 				left = True
+			else:
+				left = False
+		elif x - 1 < 0:
+			leftEnd = True
+			left = False
 
-			if x + 1 <= len(self.board[y]) - 1 and self.board[y][x + 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
+		if x + 1 <= len(self.board[y]) - 1:
+			rightEnd = False
+			if self.board[y][x + 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				print("1: ", self.board[y][x])
+				print("2: ",self.board[y][x + 1])
 				nextToTile = True
 				right = True
+			else:
+				right = False
+		elif x + 1 > len(self.board[y]) - 1:
+			rightEnd = True
+			right = False
 
-			if y - 1 >= 0 and self.board[y - 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
-				nextToTile = True
-				up = True
+		if y - 1 >= 0 and self.board[y - 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
+			nextToTile = True
+			up = True
+		elif y - 1 < 0:
+			upEnd = True
 
-			if y + 1 <= len(self.board) - 1 and self.board[y + 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
-				nextToTile = True
-				down = True
+		if y + 1 <= len(self.board) - 1 and self.board[y + 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
+			nextToTile = True
+			down = True
+		elif y + 1 > len(self.board) - 1:
+			downEnd = True
 
-		return nextToTile, left, right, up, down
+		return nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd
 
 	def addLetter(self, letter, value, x, y):
 		"""Add a letter to the board specifying x and y position."""
