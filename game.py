@@ -52,14 +52,14 @@ class Game:
 		if currentNode is None:
 			currentNode = trie.head
 
-		# if word found then add it to words
-		if currentNode.end:
+		# if word found and player letters have been used then add it to words
+		if currentNode.end and (len(letters) < 7):
 			if direction == 'right':
-				startX = x - len(currentNode.data[0])
+				startX = x - len(currentNode.data[0]) + 1  # end of word x coordinate - lengh of word found + 1 to correct offset
 				startY = y
 			else:
 				startX = x
-				startY = y - len(currentNode.data[0]) + 1
+				startY = y - len(currentNode.data[0]) + 1 # end of word y coordinate - lengh of word found + 1 to correct offset
 
 			words.append([currentNode.data, startX, startY, direction])
 
@@ -70,6 +70,7 @@ class Game:
 		else:
 			nextSpace = down
 
+		# If current space is occupied then add it into the current word search and move of
 		if nextSpace:
 			if direction == 'right':
 				letter = self.board.board[y][x + 1]
@@ -79,10 +80,10 @@ class Game:
 				letter = self.board.board[y + 1][x]
 				nextX = x
 				nextY = y + 1
-			print(letter)
 			if letter[0] in currentNode.children:
 				newLetters = letters.copy()
 				words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[letter[0]])
+		# add letter from player tiles into current word search
 		elif len(letters) is not 0:
 			if direction == 'right':
 				boardEnd = rightEnd
@@ -92,21 +93,32 @@ class Game:
 				boardEnd = downEnd
 				nextX = x
 				nextY = y + 1
+			# make sure tiles are not going off the board
 			if boardEnd is not True:
 				# i keeps track of current letter
 				# searched stop duplicate searches if input has repeated letters
-
-																							#<<<<<<< Need to add check if other direction is changed
 
 				i = 0
 				searched = []
 				for letter in letters:
 					if letter not in searched:
 						searched.append(letter)
-						if letter in currentNode.children:
+						if letter == '?':
+							for char in currentNode.children:
+
+																	#<<<<<<<<< If new tile creates a word in the other direction check it!
+
+								newLetters = letters.copy()
+								del newLetters[i]
+								words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[char])
+						elif letter in currentNode.children:
+
+																	#<<<<<<<<< If new tile creates a word in the other direction check it!
+
 							newLetters = letters.copy()
 							del newLetters[i]
 							words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[letter])
+
 					i += 1
 
 		# return words found
@@ -133,19 +145,19 @@ class Game:
 				for x in range(len(self.board.board[y])):
 					# If current position is empty and next to a tile in play add it to list with direction a new word would have to go
 					if self.board.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
-						nextToTile, right, left, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y)
+						nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y)
 						if nextToTile:
 							if right:  # Need to work on this (extendRight)
-								pass
+								moves += self.extendLeft(x, y, 'right', player.letters, trie)
 
 							if left:
-								moves += self.extendLeft(x - 1, y, 'right', player.letters, trie)
+								pass
 
 							if up:  # Need to work on this (extendRight)
 								pass
 
 							if down:
-								moves += self.extendLeft(x, y - 1, 'down', player.letters, trie)
+								moves += self.extendLeft(x, y, 'down', player.letters, trie)
 
 			return moves
 
@@ -269,9 +281,8 @@ class Board:
 			self.playedTiles = self.playedTiles + 1
 			return True
 
-	def checkWord(self, x, y, direction, beginning, trie, placedWord):
-		"""Given the x, y, and if the word starts, ends or contains that tile will return true or false if the word is valid."""
-		# Will find the start and end x and y values before checking if the word found is accepted
+	def findWordPosition(self, x, y, beginning, direction):
+		"""Find the start and end X and Y of a word from a given location on the word."""
 		if beginning is False:
 			endX = x
 			endY = y
@@ -348,6 +359,14 @@ class Board:
 					else:
 						y = y + 1
 
+		return startX, startY, endX, endY
+
+
+	def checkWord(self, x, y, direction, beginning, trie, placedWord):
+		"""Given the x, y, and if the word starts, ends or contains that tile will return true or false if the word is valid."""
+
+		startX, startY, endX, endY = self.findWordPosition(x, y, beginning, direction)
+
 		# Gets the new word on the board as a string
 		wordListY = self.board[startY:endY + 1]
 		wordListX = [item[startX:endX + 1] for item in wordListY]
@@ -380,6 +399,7 @@ class Board:
 
 		wordScore = wordScore * multiplierTotal  # Apply word multiplier
 
+		# checks if the word found is accepted
 		if trie.hasWord(word.lower()):
 			return True, wordScore
 		else:
