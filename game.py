@@ -44,7 +44,7 @@ class Game:
 		else:
 			self.active = self.active + 1
 
-	def extendLeft(self, x, y, direction, letters, trie, currentNode=None):
+	def extendLeft(self, x, y, direction, letters, trie, currentNode=None, TileClose=False, nextTile=None):
 		"""Return moves that can be made given a starting position, player and direction."""
 		# list of all words found
 		words = []
@@ -52,8 +52,8 @@ class Game:
 		if currentNode is None:
 			currentNode = trie.head
 
-		# if word found and player letters have been used then add it to words
-		if currentNode.end and (len(letters) < 7):
+		# if word found, at least one player letter has been used, word is next existing tiles and the next tile is not populated
+		if currentNode.end and (len(letters) < 7) and TileClose and nextTile in [None, 'DL', 'DW', 'TL', 'TW']:
 			if direction == 'right':
 				startX = x - len(currentNode.data[0]) + 1  # end of word x coordinate - lengh of word found + 1 to correct offset
 				startY = y
@@ -65,6 +65,9 @@ class Game:
 
 		nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y)
 
+		if not TileClose:
+			TileClose = nextToTile
+
 		if direction == 'right':
 			nextSpace = right
 		else:
@@ -74,25 +77,35 @@ class Game:
 		if nextSpace:
 			if direction == 'right':
 				letter = self.board.board[y][x + 1]
+				nextLetter = self.board.board[y][x + 2]
 				nextX = x + 1
 				nextY = y
 			else:
 				letter = self.board.board[y + 1][x]
+				nextLetter = self.board.board[y + 2][x]
 				nextX = x
 				nextY = y + 1
 			if letter[0] in currentNode.children:
 				newLetters = letters.copy()
-				words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[letter[0]])
+				words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[letter[0]], TileClose, nextLetter)
 		# add letter from player tiles into current word search
 		elif len(letters) is not 0:
 			if direction == 'right':
 				boardEnd = rightEnd
 				nextX = x + 1
 				nextY = y
+				if boardEnd:
+					nextLetter = False
+				else:
+					nextLetter = self.board.board[nextY][nextX + 1]
 			else:
 				boardEnd = downEnd
 				nextX = x
 				nextY = y + 1
+				if boardEnd:
+					nextLetter = False
+				else:
+					nextLetter = self.board.board[nextY + 1][nextX]
 			# make sure tiles are not going off the board
 			if boardEnd is not True:
 				# i keeps track of current letter
@@ -109,6 +122,8 @@ class Game:
 								# If new tile creates a word in the other direction check it!
 								if direction == 'right':
 									nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x + 1, y)
+									if not TileClose:
+										TileClose = nextToTile
 									if up or down:
 										newWordAccepted = self.board.blindCheckWord(x + 1, y, char, 'down', trie, up, down)
 									# Dont need to check if another word is valid
@@ -116,6 +131,8 @@ class Game:
 										newWordAccepted = True
 								elif direction == 'down' and (left or right):
 									nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y + 1)
+									if not TileClose:
+										TileClose = nextToTile
 									if left or right:
 										newWordAccepted = self.board.blindCheckWord(x, y + 1, char, 'right', trie, left, right)
 									# Dont need to check if another word is valid
@@ -128,12 +145,14 @@ class Game:
 								newLetters = letters.copy()
 								del newLetters[i]
 								if newWordAccepted:
-									words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[char])
+									words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[char], TileClose, nextLetter)
 						elif letter in currentNode.children:
 
 							# If new tile creates a word in the other direction check it!
 							if direction == 'right':
 								nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x + 1, y)
+								if not TileClose:
+									TileClose = nextToTile
 								if up or down:
 									newWordAccepted = self.board.blindCheckWord(x + 1, y, letter, 'down', trie, up, down)
 								# Dont need to check if another word is valid
@@ -141,6 +160,8 @@ class Game:
 									newWordAccepted = True
 							elif direction == 'down':
 								nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y + 1)
+								if not TileClose:
+									TileClose = nextToTile
 								if left or right:
 									newWordAccepted = self.board.blindCheckWord(x, y + 1, letter, 'right', trie, left, right)
 								# Dont need to check if another word is valid
@@ -153,7 +174,7 @@ class Game:
 							newLetters = letters.copy()
 							del newLetters[i]
 							if newWordAccepted:
-								words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[letter])
+								words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[letter], TileClose, nextLetter)
 
 					i += 1
 
@@ -184,16 +205,14 @@ class Game:
 						nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y)
 						if nextToTile:
 							if right:  # Need to work on this (extendRight)
-								moves += self.extendLeft(x, y, 'right', player.letters, trie)
-
-							if left:
-								pass
-
-							if up:  # Need to work on this (extendRight)
-								pass
+								for i in range(8):
+									if x - i >= 0:
+										moves += self.extendLeft(x - i, y, 'right', player.letters, trie)
 
 							if down:
-								moves += self.extendLeft(x, y, 'down', player.letters, trie)
+								for i in range(8):
+									if y - i >= 0:
+										moves += self.extendLeft(x, y - i, 'down', player.letters, trie)
 
 			return moves
 
@@ -425,12 +444,6 @@ class Board:
 
 		"""
 
-		print()
-		print('x:', x, 'y:', y)
-		print('before:', before)
-		print('after:', after)
-		print('direction:', direction)
-
 		# Get word placed on board before the tile to be placed
 		if before:
 			if direction == 'right':
@@ -443,8 +456,6 @@ class Board:
 			part1, wordList1 = self.getBoardSpaces(startX1, startY1, endX1, endY1, direction)
 		else:
 			part1 = ''
-
-		print('part1:' , part1)
 
 		# Get word placed on board after the tile to be placed
 		if after:
@@ -459,13 +470,7 @@ class Board:
 		else:
 			part2 = ''
 
-		print('part2:' , part2)
-
-		print('letter:' , letter)
-
 		word = part1 + letter + part2  # construct word
-
-		print('word:', word)
 
 		# checks if the word found is accepted
 		if trie.hasWord(word.lower()):
