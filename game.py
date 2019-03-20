@@ -106,18 +106,54 @@ class Game:
 						if letter == '?':
 							for char in currentNode.children:
 
-																	#<<<<<<<<< If new tile creates a word in the other direction check it!
+								# If new tile creates a word in the other direction check it!
+								if direction == 'right':
+									nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x + 1, y)
+									if up or down:
+										newWordAccepted = self.board.blindCheckWord(x + 1, y, char, 'down', trie, up, down)
+									# Dont need to check if another word is valid
+									else:
+										newWordAccepted = True
+								elif direction == 'down' and (left or right):
+									nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y + 1)
+									if left or right:
+										newWordAccepted = self.board.blindCheckWord(x, y + 1, char, 'right', trie, left, right)
+									# Dont need to check if another word is valid
+									else:
+										newWordAccepted = True
+								# Dont need to check if another word is valid
+								else:
+									newWordAccepted = True
 
 								newLetters = letters.copy()
 								del newLetters[i]
-								words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[char])
+								if newWordAccepted:
+									words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[char])
 						elif letter in currentNode.children:
 
-																	#<<<<<<<<< If new tile creates a word in the other direction check it!
+							# If new tile creates a word in the other direction check it!
+							if direction == 'right':
+								nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x + 1, y)
+								if up or down:
+									newWordAccepted = self.board.blindCheckWord(x + 1, y, letter, 'down', trie, up, down)
+								# Dont need to check if another word is valid
+								else:
+									newWordAccepted = True
+							elif direction == 'down':
+								nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y + 1)
+								if left or right:
+									newWordAccepted = self.board.blindCheckWord(x, y + 1, letter, 'right', trie, left, right)
+								# Dont need to check if another word is valid
+								else:
+									newWordAccepted = True
+							# Dont need to check if another word is valid
+							else:
+								newWordAccepted = True
 
 							newLetters = letters.copy()
 							del newLetters[i]
-							words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[letter])
+							if newWordAccepted:
+								words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[letter])
 
 					i += 1
 
@@ -162,30 +198,35 @@ class Game:
 			return moves
 
 
-			# ========= some notes on how to find all possible moves =========
-
-			"""
-
-			Getting a list of all possible moves ranked on score could take a long time. For that reason
-			some clever method will have to be used in order to minimise the amount of time. The following
-			is some notes from reading papers and questions online although this solution is not exactly
-			the same as any I could find.
-
-			1. Get a list of all free spaces on the board next to a tile(s) - DONE
-			2. For each space in list generate all possible moves
-				* attempt to find words perpendicular to word on board next to free space
-				* Work out the max lengh of word that can fit without hitting another
-				* run through findWords with requirements (probably use a modifed version of contains)
-
-			"""
-
-
 class Board:
 	"""Scrabble board."""
 
 	def __init__(self):
 		"""Initilise the board."""
+
 		self.board = [
+					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW'],
+					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
+					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
+					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
+					[None, None, None, None, 'DW', None, None, None, None, None, 'DW', None, None, None, None],
+					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None],
+					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DL', None, None],
+					['TW', None, None, 'DL', None, None, None, ['t', 1], ['a', 1], ['n', 1], None, 'DL', None, None, 'TW'],
+					[None, None, 'DL', None, None, None, 'DL', ['h', 4], 'DL', None, None, None, 'DL', None, None],
+					[None, 'TL', None, None, None, 'TL', None, ['a', 1], None, 'TL', None, None, None, 'TL', None],
+					[None, None, None, None, 'DW', None, None, ['n', 1], None, None, 'DW', None, None, None, None],
+					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
+					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
+					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
+					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW'],
+		]
+		self.playedTiles = 6
+
+
+
+
+		"""self.board = [
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW'],
 					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
 					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
@@ -202,7 +243,7 @@ class Board:
 					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW']
 					]
-		self.playedTiles = 0
+		self.playedTiles = 0"""
 
 	def nextToTiles(self, x, y):
 		"""Given a grid location this will return if there are surrounding tiles and which ones they are."""
@@ -361,13 +402,8 @@ class Board:
 
 		return startX, startY, endX, endY
 
-
-	def checkWord(self, x, y, direction, beginning, trie, placedWord):
-		"""Given the x, y, and if the word starts, ends or contains that tile will return true or false if the word is valid."""
-
-		startX, startY, endX, endY = self.findWordPosition(x, y, beginning, direction)
-
-		# Gets the new word on the board as a string
+	def getBoardSpaces(self, startX, startY, endX, endY, direction):
+		"""Returns a string given a start and end location on the board"""
 		wordListY = self.board[startY:endY + 1]
 		wordListX = [item[startX:endX + 1] for item in wordListY]
 		if direction == 'right':
@@ -375,6 +411,80 @@ class Board:
 		else:
 			wordList = [item[0] for item in wordListX]
 		word = ''.join([item[0] for item in wordList])
+
+		return word, wordList
+
+	def blindCheckWord(self, x, y, letter, direction, trie, before, after):
+		"""
+		Will return true or false if the word to create is valid.
+
+		* x and y is the location of the tile to be placed
+		* the letter is a tile that is being placed (only the string char)
+		* direction can either be right or down and is the direction of the word
+		* before and after can be true or false and will show where the word on the board is (used with direction)
+
+		"""
+
+		print()
+		print('x:', x, 'y:', y)
+		print('before:', before)
+		print('after:', after)
+		print('direction:', direction)
+
+		# Get word placed on board before the tile to be placed
+		if before:
+			if direction == 'right':
+				newX = x - 1
+				newY = y
+			else:
+				newX = x
+				newY = y - 1
+			startX1, startY1, endX1, endY1 = self.findWordPosition(newX, newY, False, direction)
+			part1, wordList1 = self.getBoardSpaces(startX1, startY1, endX1, endY1, direction)
+		else:
+			part1 = ''
+
+		print('part1:' , part1)
+
+		# Get word placed on board after the tile to be placed
+		if after:
+			if direction == 'right':
+				newX = x
+				newY = y + 1
+			else:
+				newX = x + 1
+				newY = y
+			startX2, startY2, endX2, endY2 = self.findWordPosition(newX, newY, True, direction)
+			part2, wordList2 = self.getBoardSpaces(startX2, startY2, endX2, endY2, direction)
+		else:
+			part2 = ''
+
+		print('part2:' , part2)
+
+		print('letter:' , letter)
+
+		word = part1 + letter + part2  # construct word
+
+		print('word:', word)
+
+		# checks if the word found is accepted
+		if trie.hasWord(word.lower()):
+			return True
+		else:
+			# If word is a single tile down count it (single tile words are not counted as words)
+			if len(word) == 1:
+				return True
+			else:
+				return False
+
+
+	def checkWord(self, x, y, direction, beginning, trie, placedWord):
+		"""Given the x, y, and if the word starts, ends or contains that tile will return true or false if the word is valid."""
+
+		startX, startY, endX, endY = self.findWordPosition(x, y, beginning, direction)
+
+		# Gets the new word on the board as a string
+		word, wordList = self.getBoardSpaces(startX, startY, endX, endY, direction)
 
 		# Calculates word score
 		multiplierTotal = 1
