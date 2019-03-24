@@ -1,6 +1,6 @@
 # STAR
 
-Scrabble Turn Automation Robot is a solver for scrabble. It will be able to give accepted words when given a set of characters.
+Scrabble Turn Automation Robot is a solver for scrabble. Once complete it will be able to find the best move you can make given a board and a set of tiles.
 
 ## Data structure
 
@@ -149,3 +149,5 @@ Find moves will return all playable moves a player can make taking into consider
 	* By doing this we can also find moves using multiple tiles that have already been played and ensure if multiple words have been played they are still accepted.
 	
 findMoves was based of the algorithem used in [The World’s Fastest Scrabble Program](http://www.cs.cmu.edu/afs/cs/academic/class/15451-s06/www/lectures/scrabble.pdf).
+
+The current state of this feature finds words placed perpendicular to current words in play on the board. It extends a word right and down. This should find all playable words apart from those that are played parallel to current words in play (It will find some in the current state but none that are not perpendicular to another word).
