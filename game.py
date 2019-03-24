@@ -52,7 +52,7 @@ class Game:
 		if currentNode is None:
 			currentNode = trie.head
 
-		# if word found, at least one player letter has been used, word is next existing tiles and the next tile is not populated
+		# if word found, at least one player letter has been used, word is next to existing tiles and the next tile is not populated
 		if currentNode.end and (len(letters) < 7) and TileClose and nextTile in [None, 'DL', 'DW', 'TL', 'TW']:
 			if direction == 'right':
 				startX = x - len(currentNode.data[0]) + 1  # end of word x coordinate - lengh of word found + 1 to correct offset
@@ -73,7 +73,7 @@ class Game:
 		else:
 			nextSpace = down
 
-		# If current space is occupied then add it into the current word search and move of
+		# If current space is occupied then add it into the current word search and move on
 		if nextSpace:
 			if direction == 'right':
 				letter = self.board.board[y][x + 1]
@@ -95,17 +95,28 @@ class Game:
 				nextX = x + 1
 				nextY = y
 				if boardEnd:
-					nextLetter = False
+					nextLetter = None
 				else:
-					nextLetter = self.board.board[nextY][nextX + 1]
+					# if next space is off the board set it to none
+					if nextX + 1 > 14:
+						nextLetter = None
+					# if next space is on the board, see if it is populated
+					else:
+						nextLetter = self.board.board[nextY][nextX + 1]
 			else:
 				boardEnd = downEnd
 				nextX = x
 				nextY = y + 1
+				# if next space is off the board set it to none
 				if boardEnd:
-					nextLetter = False
+					nextLetter = None
 				else:
-					nextLetter = self.board.board[nextY + 1][nextX]
+					# if next space is off the board set it to none
+					if nextY + 1 > 14:
+						nextLetter = None
+					# if next space is on the board, see if it is populated
+					else:
+						nextLetter = self.board.board[nextY + 1][nextX]
 			# make sure tiles are not going off the board
 			if boardEnd is not True:
 				# i keeps track of current letter
@@ -204,7 +215,7 @@ class Game:
 					if self.board.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
 						nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y)
 						if nextToTile:
-							if right:  # Need to work on this (extendRight)
+							if right:
 								for i in range(8):
 									if x - i >= 0:
 										moves += self.extendLeft(x - i, y, 'right', player.letters, trie)
@@ -270,10 +281,6 @@ class Board:
 		# left, right, up and down will be true if there is a tile in that direction of the position
 		# leftEnd, rightEnd, upEnd and downEnd will be true if the position being searched is next to the end of the board (in that direction)
 		nextToTile = False
-		up = False
-		upEnd = False
-		down = False
-		downEnd = False
 
 		# If the tile to the left of the input is on the board
 		if x - 1 >= 0:
@@ -298,17 +305,27 @@ class Board:
 			rightEnd = True
 			right = False
 
-		if y - 1 >= 0 and self.board[y - 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
-			nextToTile = True
-			up = True
+		if y - 1 >= 0:
+			upEnd = False
+			if self.board[y - 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				nextToTile = True
+				up = True
+			else:
+				up = False
 		elif y - 1 < 0:
 			upEnd = True
+			up = False
 
-		if y + 1 <= len(self.board) - 1 and self.board[y + 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
-			nextToTile = True
-			down = True
+		if y + 1 <= len(self.board) - 1:
+			downEnd = False
+			if self.board[y + 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				nextToTile = True
+				down = True
+			else:
+				down = False
 		elif y + 1 > len(self.board) - 1:
 			downEnd = True
+			down = False
 
 		return nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd
 
