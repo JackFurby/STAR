@@ -1,6 +1,6 @@
 # STAR
 
-Scrabble Turn Automation Robot is a solver for scrabble. It will be able to give accepted words when given a set of characters.
+Scrabble Turn Automation Robot is a solver for scrabble. Once complete it will be able to find the best move you can make given a board and a set of tiles.
 
 ## Data structure
 
