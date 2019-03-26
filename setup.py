@@ -1,16 +1,15 @@
 import glob
 import errno
 import pickle
-from game import letterScore
 
 
-def getScore(word):
-	"""Return a tuple with a score and breakdown a given word would get."""
-	breakdown = []
-	for letter in word:
-		breakdown.append(letterScore(letter))
-	total = sum(breakdown)
-	return total
+#def getScore(word):
+#	"""Return a tuple with a score and breakdown a given word would get."""
+#	breakdown = []
+#	for letter in word:
+#		breakdown.append(letterScore(letter))
+#	total = sum(breakdown)
+#	return total
 
 
 def setup(trie):

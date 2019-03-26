@@ -1,6 +1,7 @@
 """Game environment."""
 import random
 from trie import Trie
+from setup import setup, save_trie, load_trie
 import copy
 
 class Game:
@@ -12,6 +13,10 @@ class Game:
 		self.players = []
 		self.tiles = Tiles()
 		self.active = 0
+		# trie = Trie()
+		# setup(trie)
+		# save_trie(trie, 'v1')
+		self.trie = load_trie('v1')  # Word list
 
 	def newPlayer(self):
 		"""Create a new player (max 4 per game) with no tiles."""
@@ -242,28 +247,6 @@ class Board:
 					[None, None, None, None, 'DW', None, None, None, None, None, 'DW', None, None, None, None],
 					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None],
 					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DL', None, None],
-					['TW', None, None, 'DL', None, None, None, ['t', 1], ['a', 1], ['n', 1], None, 'DL', None, None, 'TW'],
-					[None, None, 'DL', None, None, None, 'DL', ['h', 4], 'DL', None, None, None, 'DL', None, None],
-					[None, 'TL', None, None, None, 'TL', None, ['a', 1], None, 'TL', None, None, None, 'TL', None],
-					[None, None, None, None, 'DW', None, None, ['n', 1], None, None, 'DW', None, None, None, None],
-					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
-					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
-					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
-					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW'],
-		]
-		self.playedTiles = 6
-
-
-
-
-		"""self.board = [
-					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW'],
-					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
-					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
-					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
-					[None, None, None, None, 'DW', None, None, None, None, None, 'DW', None, None, None, None],
-					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None],
-					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DL', None, None],
 					['TW', None, None, 'DL', None, None, None, 'DW', None, None, None, 'DL', None, None, 'TW'],
 					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DL', None, None],
 					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None],
@@ -273,7 +256,8 @@ class Board:
 					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW']
 					]
-		self.playedTiles = 0"""
+		self.playedTiles = 0
+		self.emptyTiles = [None, 'DL', 'DW', 'TL', 'TW']  # Type of spaces on the board that are empty
 
 	def nextToTiles(self, x, y):
 		"""Given a grid location this will return if there are surrounding tiles and which ones they are."""
@@ -285,7 +269,7 @@ class Board:
 		# If the tile to the left of the input is on the board
 		if x - 1 >= 0:
 			leftEnd = False
-			if self.board[y][x - 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
+			if self.board[y][x - 1] not in self.emptyTiles:
 				nextToTile = True
 				left = True
 			else:
@@ -296,7 +280,7 @@ class Board:
 
 		if x + 1 <= len(self.board[y]) - 1:
 			rightEnd = False
-			if self.board[y][x + 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
+			if self.board[y][x + 1] not in self.emptyTiles:
 				nextToTile = True
 				right = True
 			else:
@@ -307,7 +291,7 @@ class Board:
 
 		if y - 1 >= 0:
 			upEnd = False
-			if self.board[y - 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
+			if self.board[y - 1][x] not in self.emptyTiles:
 				nextToTile = True
 				up = True
 			else:
@@ -318,7 +302,7 @@ class Board:
 
 		if y + 1 <= len(self.board) - 1:
 			downEnd = False
-			if self.board[y + 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
+			if self.board[y + 1][x] not in self.emptyTiles:
 				nextToTile = True
 				down = True
 			else:
@@ -338,7 +322,7 @@ class Board:
 		if (x > 14 or x < 0) or (y > 14 or y < 0):
 			return False
 		# tile cannot be onto of another tile
-		elif self.board[y][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
+		elif self.board[y][x] not in self.emptyTiles:
 			return -1
 		else:
 			# tile stored as list so value of tile can be stored along with tile / word multipliers
@@ -366,7 +350,7 @@ class Board:
 
 			find = True
 			while find:
-				if (x < 0 or y < 0) or self.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
+				if (x < 0 or y < 0) or self.board[y][x] in self.emptyTiles:
 					if direction == 'right':
 						startY = y
 						startX = x + 1
@@ -385,7 +369,7 @@ class Board:
 
 			find = True
 			while find:
-				if (x > 14 or y > 14) or self.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
+				if (x > 14 or y > 14) or self.board[y][x] in self.emptyTiles:
 					if direction == 'right':
 						endY = y
 						endX = x - 1
@@ -404,7 +388,7 @@ class Board:
 
 			findStart = True
 			while findStart:
-				if (x < 0 or y < 0) or self.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
+				if (x < 0 or y < 0) or self.board[y][x] in self.emptyTiles:
 					if direction == 'right':
 						startY = y
 						startX = x + 1
@@ -422,7 +406,7 @@ class Board:
 
 			findEnd = True
 			while findEnd:
-				if (x > 14 or y > 14) or self.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
+				if (x > 14 or y > 14) or self.board[y][x] in self.emptyTiles:
 					if direction == 'right':
 						endY = y
 						endX = x - 1
@@ -439,7 +423,7 @@ class Board:
 		return startX, startY, endX, endY
 
 	def getBoardSpaces(self, startX, startY, endX, endY, direction):
-		"""Returns a string given a start and end location on the board"""
+		"""Return a string of tiles given a start and end location on the board."""
 		wordListY = self.board[startY:endY + 1]
 		wordListX = [item[startX:endX + 1] for item in wordListY]
 		if direction == 'right':
@@ -460,7 +444,6 @@ class Board:
 		* before and after can be true or false and will show where the word on the board is (used with direction)
 
 		"""
-
 		# Get word placed on board before the tile to be placed
 		if before:
 			if direction == 'right':
@@ -502,7 +485,6 @@ class Board:
 
 	def checkWord(self, x, y, direction, beginning, trie, placedWord):
 		"""Given the x, y, and if the word starts, ends or contains that tile will return true or false if the word is valid."""
-
 		startX, startY, endX, endY = self.findWordPosition(x, y, beginning, direction)
 
 		# Gets the new word on the board as a string
@@ -569,11 +551,13 @@ class Board:
 			if x is 7 and y is 7:
 				nextToTiles = True
 
+			nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.nextToTiles(x, y)
+
 			# Check tiles next to each tiles places to see if they add to existing words
 			# If true the new word will be checked and return False if not valid
 			if direction == 'right':
 				# If tile above and below is not empty
-				if ((y - 1 >= 0) and self.board[y - 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']) and ((y + 1 <= 14) and self.board[y + 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']):
+				if up and down:
 					newWord, wordScore = self.checkWord(x, y, 'down', None, trie, False)
 					if newWord is False:
 						return False, True, score
@@ -581,7 +565,7 @@ class Board:
 						nextToTiles = True
 						score = score + wordScore
 				# If tile above is not empty
-				elif (y - 1 >= 0) and self.board[y - 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				elif up:
 					newWord, wordScore = self.checkWord(x, y, 'down', False, trie, False)
 					if newWord is False:
 						return False, True, score
@@ -589,7 +573,7 @@ class Board:
 						nextToTiles = True
 						score = score + wordScore
 				# If tile below is not empty
-				elif (y + 1 <= 14) and self.board[y + 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				elif down:
 					newWord, wordScore = self.checkWord(x, y, 'down', True, trie, False)
 					if newWord is False:
 						return False, True, score
@@ -598,7 +582,7 @@ class Board:
 						score = score + wordScore
 			else:
 				# If tile left and right is not empty
-				if ((x - 1 >= 0) and self.board[y][x - 1] not in [None, 'DL', 'DW', 'TL', 'TW']) and ((x + 1 <= 14) and self.board[y][x + 1] not in [None, 'DL', 'DW', 'TL', 'TW']):
+				if left and right:
 					newWord, wordScore = self.checkWord(x, y, 'right', None, trie, False)
 					if newWord is False:
 						return False, True, score
@@ -606,7 +590,7 @@ class Board:
 						nextToTiles = True
 						score = score + wordScore
 				# If tile left is not empty
-				elif (x - 1 >= 0) and self.board[y][x - 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				elif left:
 					newWord, wordScore = self.checkWord(x, y, 'right', False, trie, False)
 					if newWord is False:
 						return False, True, score
@@ -614,7 +598,7 @@ class Board:
 						nextToTiles = True
 						score = score + wordScore
 				# If tile right is not empty
-				elif (x + 1 <= 14) and self.board[y][x + 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				elif right:
 					newWord, wordScore = self.checkWord(x, y, 'right', True, trie, False)
 					if newWord is False:
 						return False, True, score
@@ -628,10 +612,10 @@ class Board:
 
 			# If last tile placed is followed by another tile mark nextToTiles as true
 			if direction == 'right':
-				if (x + 1 <= 14) and self.board[y][x + 1] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				if right:
 					nextToTiles = True
 			else:
-				if (y + 1 <= 14) and self.board[y + 1][x] not in [None, 'DL', 'DW', 'TL', 'TW']:
+				if down:
 					nextToTiles = True
 
 			if newWord is False:
@@ -668,10 +652,10 @@ class Board:
 
 		# If first tile placed is preceded by another tile mark nextToTiles as true
 		if direction == 'right':
-			if self.board[int(y)][int(x - 1)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+			if self.board[int(y)][int(x - 1)] not in self.emptyTiles:
 				nextToTiles = True
 		else:
-			if self.board[int(y - 1)][int(x)] not in [None, 'DL', 'DW', 'TL', 'TW']:
+			if self.board[int(y - 1)][int(x)] not in self.emptyTiles:
 				nextToTiles = True
 
 		allowed, nextToTilesReturn, score = self.addLetters(word, x, y, direction, trie)
@@ -729,7 +713,7 @@ class Tiles:
 						['z', 1],
 						['?', 2]]
 
-		# Available letters that have not been played or held by a played
+		# Available letters that have not been played or held by a player
 		self.letters = []
 
 		# Fills array of letters with all tiles for a game in a random order

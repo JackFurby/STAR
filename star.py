@@ -1,7 +1,6 @@
 """STAR."""
 import time
-from game import Board, Tiles, Game
-from setup import setup, letterScore, getScore, save_trie, load_trie
+from game import Board, Tiles, Game, letterScore
 from trie import Trie, Node
 import copy
 
@@ -27,11 +26,6 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('STAR')
 screen.fill(background_colour)
 
-# trie = Trie()
-# setup(trie)
-# save_trie(trie, 'v1')
-
-trie = load_trie('v1')
 game = Game()
 currentTiles = Tiles()
 
@@ -63,7 +57,7 @@ def update():
 		# Makes sure input is in lower case
 		inputLetters = inputLetters.lower()
 
-		if trie.hasWord(inputLetters):
+		if game.trie.hasWord(inputLetters):
 			print("Yes")
 		else:
 			print("No")
@@ -71,7 +65,7 @@ def update():
 		inputLetters = input("Enter letters ('?' is a wildcard): ").lower()
 
 		start = time.time()
-		wordList = trie.wordSearch(list(inputLetters))
+		wordList = game.trie.wordSearch(list(inputLetters))
 		wordList.sort(key=lambda tup: -tup[1])
 		print(*wordList, sep='\n')
 		end = time.time()
@@ -81,7 +75,7 @@ def update():
 		inputLetters = input("Enter letters ('?' is a wildcard): ").lower()
 
 		start = time.time()
-		wordList = trie.prefix(list(inputLetters), prefixLetters)
+		wordList = game.trie.prefix(list(inputLetters), prefixLetters)
 		wordList.sort(key=lambda tup: -tup[1])
 		print(*wordList, sep='\n')
 		end = time.time()
@@ -91,7 +85,7 @@ def update():
 		inputLetters = input("Enter letters ('?' is a wildcard): ").lower()
 
 		start = time.time()
-		wordList = trie.wordSearch(list(inputLetters), suffix=suffixLetters)
+		wordList = game.trie.wordSearch(list(inputLetters), suffix=suffixLetters)
 		wordList.sort(key=lambda tup: -tup[1])
 		print(*wordList, sep='\n')
 		end = time.time()
@@ -101,7 +95,7 @@ def update():
 		inputLetters = input("Enter letters ('?' is a wildcard): ").lower()
 
 		start = time.time()
-		wordList = trie.contains(list(inputLetters), suffixLetters)
+		wordList = game.trie.contains(list(inputLetters), suffixLetters)
 		wordList.sort(key=lambda tup: -tup[1])
 		print(*wordList, sep='\n')
 		end = time.time()
@@ -109,7 +103,7 @@ def update():
 	elif action == "findMoves":
 		player = game.players[numInput(input("Enter player number: ")) - 1]
 		start = time.time()
-		wordList = game.possibleMoves(player, trie)
+		wordList = game.possibleMoves(player, game.trie)
 		#wordList.sort(key=lambda tup: -tup[1])
 		print(*wordList, sep='\n')
 		end = time.time()
@@ -232,7 +226,7 @@ def update():
 							print("Input not recognised")
 
 						# Verify word placement is valid and play it if it is
-						tilesAdded, score = game.board.addWord(word, x, y, direction, trie, player)
+						tilesAdded, score = game.board.addWord(word, x, y, direction, game.trie, player)
 						if tilesAdded:
 							# Word accepted. End turn and update score
 							turn = False
