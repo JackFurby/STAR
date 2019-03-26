@@ -103,7 +103,7 @@ def update():
 	elif action == "findMoves":
 		player = game.players[numInput(input("Enter player number: ")) - 1]
 		start = time.time()
-		wordList = game.possibleMoves(player, game.trie)
+		wordList = game.board.possibleMoves(player, game.trie)
 		#wordList.sort(key=lambda tup: -tup[1])
 		print(*wordList, sep='\n')
 		end = time.time()

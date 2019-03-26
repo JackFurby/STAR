@@ -49,6 +49,50 @@ class Game:
 		else:
 			self.active = self.active + 1
 
+
+class Board:
+	"""Scrabble board."""
+
+	def __init__(self):
+		"""Initilise the board."""
+
+		self.board = [['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW'],
+					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
+					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
+					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
+					[None, None, None, None, 'DW', None, None, None, None, None, 'DW', None, None, None, None],
+					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None],
+					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DL', None, None],
+					['TW', None, None, 'DL', None, None, None, ['g', 2], None, None, None, 'DL', None, None, 'TW'],
+					[None, None, ['d', 2], ['u', 1], ['e', 1], ['t', 1], ['t', 1], ['o', 1], 'DL', None, None, None, 'DL', None, None],
+					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None],
+					[None, None, None, None, 'DW', None, None, None, None, None, 'DW', None, None, None, None],
+					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
+					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
+					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
+					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW']]
+		self.playedTiles = 7
+
+		"""self.board = [
+					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW'],
+					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
+					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
+					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
+					[None, None, None, None, 'DW', None, None, None, None, None, 'DW', None, None, None, None],
+					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None],
+					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DL', None, None],
+					['TW', None, None, 'DL', None, None, None, 'DW', None, None, None, 'DL', None, None, 'TW'],
+					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DL', None, None],
+					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None],
+					[None, None, None, None, 'DW', None, None, None, None, None, 'DW', None, None, None, None],
+					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
+					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
+					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
+					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW']
+					]
+		self.playedTiles = 0"""
+		self.emptyTiles = [None, 'DL', 'DW', 'TL', 'TW']  # Type of spaces on the board that are empty
+
 	def extendLeft(self, x, y, direction, letters, trie, currentNode=None, TileClose=False, nextTile=None):
 		"""Return moves that can be made given a starting position, player and direction."""
 		# list of all words found
@@ -58,7 +102,7 @@ class Game:
 			currentNode = trie.head
 
 		# if word found, at least one player letter has been used, word is next to existing tiles and the next tile is not populated
-		if currentNode.end and (len(letters) < 7) and TileClose and nextTile in [None, 'DL', 'DW', 'TL', 'TW']:
+		if currentNode.end and (len(letters) < 7) and TileClose and nextTile in self.emptyTiles:
 			if direction == 'right':
 				startX = x - len(currentNode.data[0]) + 1  # end of word x coordinate - lengh of word found + 1 to correct offset
 				startY = y
@@ -68,7 +112,7 @@ class Game:
 
 			words.append([currentNode.data, startX, startY, direction])
 
-		nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y)
+		nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.nextToTiles(x, y)
 
 		if not TileClose:
 			TileClose = nextToTile
@@ -81,13 +125,13 @@ class Game:
 		# If current space is occupied then add it into the current word search and move on
 		if nextSpace:
 			if direction == 'right':
-				letter = self.board.board[y][x + 1]
-				nextLetter = self.board.board[y][x + 2]
+				letter = self.board[y][x + 1]
+				nextLetter = self.board[y][x + 2]
 				nextX = x + 1
 				nextY = y
 			else:
-				letter = self.board.board[y + 1][x]
-				nextLetter = self.board.board[y + 2][x]
+				letter = self.board[y + 1][x]
+				nextLetter = self.board[y + 2][x]
 				nextX = x
 				nextY = y + 1
 			if letter[0] in currentNode.children:
@@ -107,7 +151,7 @@ class Game:
 						nextLetter = None
 					# if next space is on the board, see if it is populated
 					else:
-						nextLetter = self.board.board[nextY][nextX + 1]
+						nextLetter = self.board[nextY][nextX + 1]
 			else:
 				boardEnd = downEnd
 				nextX = x
@@ -121,7 +165,7 @@ class Game:
 						nextLetter = None
 					# if next space is on the board, see if it is populated
 					else:
-						nextLetter = self.board.board[nextY + 1][nextX]
+						nextLetter = self.board[nextY + 1][nextX]
 			# make sure tiles are not going off the board
 			if boardEnd is not True:
 				# i keeps track of current letter
@@ -137,20 +181,20 @@ class Game:
 
 								# If new tile creates a word in the other direction check it!
 								if direction == 'right':
-									nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x + 1, y)
+									nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.nextToTiles(x + 1, y)
 									if not TileClose:
 										TileClose = nextToTile
 									if up or down:
-										newWordAccepted = self.board.blindCheckWord(x + 1, y, char, 'down', trie, up, down)
+										newWordAccepted = self.blindCheckWord(x + 1, y, char, 'down', trie, up, down)
 									# Dont need to check if another word is valid
 									else:
 										newWordAccepted = True
 								elif direction == 'down' and (left or right):
-									nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y + 1)
+									nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.nextToTiles(x, y + 1)
 									if not TileClose:
 										TileClose = nextToTile
 									if left or right:
-										newWordAccepted = self.board.blindCheckWord(x, y + 1, char, 'right', trie, left, right)
+										newWordAccepted = self.blindCheckWord(x, y + 1, char, 'right', trie, left, right)
 									# Dont need to check if another word is valid
 									else:
 										newWordAccepted = True
@@ -166,20 +210,20 @@ class Game:
 
 							# If new tile creates a word in the other direction check it!
 							if direction == 'right':
-								nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x + 1, y)
+								nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.nextToTiles(x + 1, y)
 								if not TileClose:
 									TileClose = nextToTile
 								if up or down:
-									newWordAccepted = self.board.blindCheckWord(x + 1, y, letter, 'down', trie, up, down)
+									newWordAccepted = self.blindCheckWord(x + 1, y, letter, 'down', trie, up, down)
 								# Dont need to check if another word is valid
 								else:
 									newWordAccepted = True
 							elif direction == 'down':
-								nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y + 1)
+								nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.nextToTiles(x, y + 1)
 								if not TileClose:
 									TileClose = nextToTile
 								if left or right:
-									newWordAccepted = self.board.blindCheckWord(x, y + 1, letter, 'right', trie, left, right)
+									newWordAccepted = self.blindCheckWord(x, y + 1, letter, 'right', trie, left, right)
 								# Dont need to check if another word is valid
 								else:
 									newWordAccepted = True
@@ -202,7 +246,7 @@ class Game:
 		# If board is empty return words from players tiles in all posible moves
 		moves = []
 
-		if self.board.playedTiles == 0:
+		if self.playedTiles == 0:
 			words = trie.wordSearch(player.letters)
 			# Get all moves (all words and placements)
 			for word in words:
@@ -214,11 +258,11 @@ class Game:
 		# If there are tiles on the board include them in the possible moves
 		else:
 			# Search the board for empty positions next to tiles in play
-			for y in range(len(self.board.board)):
-				for x in range(len(self.board.board[y])):
+			for y in range(len(self.board)):
+				for x in range(len(self.board[y])):
 					# If current position is empty and next to a tile in play add it to list with direction a new word would have to go
-					if self.board.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
-						nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.board.nextToTiles(x, y)
+					if self.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
+						nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.nextToTiles(x, y)
 						if nextToTile:
 							if right:
 								for i in range(8):
@@ -230,34 +274,7 @@ class Game:
 									if y - i >= 0:
 										moves += self.extendLeft(x, y - i, 'down', player.letters, trie)
 
-			return moves
-
-
-class Board:
-	"""Scrabble board."""
-
-	def __init__(self):
-		"""Initilise the board."""
-
-		self.board = [
-					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW'],
-					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
-					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
-					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
-					[None, None, None, None, 'DW', None, None, None, None, None, 'DW', None, None, None, None],
-					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None],
-					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DL', None, None],
-					['TW', None, None, 'DL', None, None, None, 'DW', None, None, None, 'DL', None, None, 'TW'],
-					[None, None, 'DL', None, None, None, 'DL', None, 'DL', None, None, None, 'DL', None, None],
-					[None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'TL', None],
-					[None, None, None, None, 'DW', None, None, None, None, None, 'DW', None, None, None, None],
-					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
-					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
-					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
-					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW']
-					]
-		self.playedTiles = 0
-		self.emptyTiles = [None, 'DL', 'DW', 'TL', 'TW']  # Type of spaces on the board that are empty
+		return moves
 
 	def nextToTiles(self, x, y):
 		"""Given a grid location this will return if there are surrounding tiles and which ones they are."""
@@ -460,11 +477,11 @@ class Board:
 		# Get word placed on board after the tile to be placed
 		if after:
 			if direction == 'right':
-				newX = x
-				newY = y + 1
-			else:
 				newX = x + 1
 				newY = y
+			else:
+				newX = x
+				newY = y + 1
 			startX2, startY2, endX2, endY2 = self.findWordPosition(newX, newY, True, direction)
 			part2, wordList2 = self.getBoardSpaces(startX2, startY2, endX2, endY2, direction)
 		else:
