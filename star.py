@@ -101,13 +101,16 @@ def update():
 		end = time.time()
 		print("Completed search in", end - start, 'seconds')
 	elif action == "findMoves":
-		player = game.players[numInput(input("Enter player number: ")) - 1]
-		start = time.time()
-		wordList = game.board.possibleMoves(player, game.trie)
-		#wordList.sort(key=lambda tup: -tup[1])
-		print(*wordList, sep='\n')
-		end = time.time()
-		print("Completed search in", end - start, 'seconds')
+		player = game.getPlayer(numInput(input("Enter player number: ")) - 1)
+		if player != False:
+			start = time.time()
+			wordList = game.board.possibleMoves(player, game.trie)
+			#wordList.sort(key=lambda tup: -tup[1])
+			print(*wordList, sep='\n')
+			end = time.time()
+			print("Completed search in", end - start, 'seconds')
+		else:
+			print("Player not created")
 	elif action == "board":
 		game.board.printBoard()
 	elif action == "addLetter":

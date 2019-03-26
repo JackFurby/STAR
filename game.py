@@ -29,7 +29,16 @@ class Game:
 
 	def getPlayer(self, index):
 		"""Return a player given an index."""
-		return self.players[index]
+		# If no players exist return False
+		if len(self.players) == 0:
+			return False
+		# If players exist then return the player requested
+		else:
+			# If player requested does not exist then return False
+			if len(self.players) < (index + 1):
+				return False
+			else:
+				return self.players[index]
 
 	def activePlayer(self):
 		"""Return the current active player in a given game."""
@@ -261,17 +270,17 @@ class Board:
 			for y in range(len(self.board)):
 				for x in range(len(self.board[y])):
 					# If current position is empty and next to a tile in play add it to list with direction a new word would have to go
-					if self.board[y][x] in [None, 'DL', 'DW', 'TL', 'TW']:
+					if self.board[y][x] in self.emptyTiles:
 						nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.nextToTiles(x, y)
 						if nextToTile:
 							if right:
 								for i in range(8):
-									if x - i >= 0:
+									if x - i >= -1:  # -1 is used as starting position on the board is not used to place a tile
 										moves += self.extendLeft(x - i, y, 'right', player.letters, trie)
 
 							if down:
 								for i in range(8):
-									if y - i >= 0:
+									if y - i >= -1:  # -1 is used as starting position on the board is not used to place a tile
 										moves += self.extendLeft(x, y - i, 'down', player.letters, trie)
 
 		return moves
