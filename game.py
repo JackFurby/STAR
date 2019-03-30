@@ -102,13 +102,18 @@ class Board:
 		self.playedTiles = 0"""
 		self.emptyTiles = [None, 'DL', 'DW', 'TL', 'TW']  # Type of spaces on the board that are empty
 
-	def extendLeft(self, x, y, direction, letters, trie, currentNode=None, TileClose=False, nextTile=None):
+	def extendLeft(self, x, y, direction, letters, trie, playedTiles=None, currentNode=None, TileClose=False, nextTile=None):
 		"""Return moves that can be made given a starting position, player and direction."""
 		# list of all words found
 		words = []
 
+		# If starting to search for moves then get head of trie
 		if currentNode is None:
 			currentNode = trie.head
+
+		# If starting to search for moves then set played tiles to an empty array
+		if playedTiles is None:
+			playedTiles = []
 
 		# if word found, at least one player letter has been used, word is next to existing tiles and the next tile is not populated
 		if currentNode.end and (len(letters) < 7) and TileClose and nextTile in self.emptyTiles:
@@ -119,7 +124,7 @@ class Board:
 				startX = x
 				startY = y - len(currentNode.data[0]) + 1 # end of word y coordinate - lengh of word found + 1 to correct offset
 
-			words.append([currentNode.data, startX, startY, direction])
+			words.append([currentNode.data, startX, startY, direction, playedTiles])
 
 		nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.nextToTiles(x, y)
 
@@ -144,8 +149,10 @@ class Board:
 				nextX = x
 				nextY = y + 1
 			if letter[0] in currentNode.children:
+				# Copy value of letters and playedTiles (otherwise will run into problems with only copying memory address)
 				newLetters = letters.copy()
-				words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[letter[0]], TileClose, nextLetter)
+				newPlayedTiles = playedTiles.copy()
+				words += self.extendLeft(nextX, nextY, direction, newLetters, trie, newPlayedTiles, currentNode.children[letter[0]], TileClose, nextLetter)
 		# add letter from player tiles into current word search
 		elif len(letters) is not 0:
 			if direction == 'right':
@@ -211,10 +218,13 @@ class Board:
 								else:
 									newWordAccepted = True
 
+								# Copy value of letters and playedTiles (otherwise will run into problems with only copying memory address)
 								newLetters = letters.copy()
 								del newLetters[i]
 								if newWordAccepted:
-									words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[char], TileClose, nextLetter)
+									newPlayedTiles = playedTiles.copy()
+									newPlayedTiles.append(['?', char])
+									words += self.extendLeft(nextX, nextY, direction, newLetters, trie, newPlayedTiles, currentNode.children[char], TileClose, nextLetter)
 						elif letter in currentNode.children:
 
 							# If new tile creates a word in the other direction check it!
@@ -240,10 +250,13 @@ class Board:
 							else:
 								newWordAccepted = True
 
+							# Copy value of letters and playedTiles (otherwise will run into problems with only copying memory address)
 							newLetters = letters.copy()
 							del newLetters[i]
 							if newWordAccepted:
-								words += self.extendLeft(nextX, nextY, direction, newLetters, trie, currentNode.children[letter], TileClose, nextLetter)
+								newPlayedTiles = playedTiles.copy()
+								newPlayedTiles.append(letter)
+								words += self.extendLeft(nextX, nextY, direction, newLetters, trie, newPlayedTiles, currentNode.children[letter], TileClose, nextLetter)
 
 					i += 1
 
