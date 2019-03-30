@@ -117,10 +117,8 @@ findWordsSuffix		-	Find all words you can make with a given set of characters + 
 findWordsContains	-	Find all words you can make with a given set of characters + a set string
 findMoves		-	Find all words you can make with a given player and the board
 board			-	Display the current state of the board
-addLetter		-	Add a letter to the board
 letters			-	Display the current letters available to take
 makePlayer		-	Makes a new player (max 4)
-takeLetters		-	Fills up a specified players letters
 playerLetters		-	Prints the letters a given player has
 playTurn		-	Make a move for the current players turn
 activePlayer		-	Print the current active player
@@ -147,7 +145,7 @@ Find moves will return all playable moves a player can make taking into consider
 * Scan the board looking for starting positions (positions next to tiles that have already been played)
 	* For each stating position add one tile from the players rack at a time in the direction of the tile that the position is next to (extending the current tile). Each time a word is found take note of it.
 	* By doing this we can also find moves using multiple tiles that have already been played and ensure if multiple words have been played they are still accepted.
-	
+
 findMoves was based of the algorithem used in [The World’s Fastest Scrabble Program](http://www.cs.cmu.edu/afs/cs/academic/class/15451-s06/www/lectures/scrabble.pdf).
 
 The current state of this feature finds words placed perpendicular to current words in play on the board. It extends a word right and down. This should find all playable words apart from those that are played parallel to current words in play (It will find some in the current state but none that are not perpendicular to another word).

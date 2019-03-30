@@ -63,7 +63,6 @@ def update():
 			print("No")
 	elif action == "findWords":
 		inputLetters = input("Enter letters ('?' is a wildcard): ").lower()
-
 		start = time.time()
 		wordList = game.trie.wordSearch(list(inputLetters))
 		wordList.sort(key=lambda tup: -tup[1])
@@ -73,7 +72,6 @@ def update():
 	elif action == "findWordsPrefix":
 		prefixLetters = input("Enter prefix (in order): ").lower()
 		inputLetters = input("Enter letters ('?' is a wildcard): ").lower()
-
 		start = time.time()
 		wordList = game.trie.prefix(list(inputLetters), prefixLetters)
 		wordList.sort(key=lambda tup: -tup[1])
@@ -83,7 +81,6 @@ def update():
 	elif action == "findWordsSuffix":
 		suffixLetters = input("Enter suffix (in order): ").lower()
 		inputLetters = input("Enter letters ('?' is a wildcard): ").lower()
-
 		start = time.time()
 		wordList = game.trie.wordSearch(list(inputLetters), suffix=suffixLetters)
 		wordList.sort(key=lambda tup: -tup[1])
@@ -93,7 +90,6 @@ def update():
 	elif action == "findWordsContains":
 		suffixLetters = input("Enter string words must contain (in order): ").lower()
 		inputLetters = input("Enter letters ('?' is a wildcard): ").lower()
-
 		start = time.time()
 		wordList = game.trie.contains(list(inputLetters), suffixLetters)
 		wordList.sort(key=lambda tup: -tup[1])
@@ -113,16 +109,6 @@ def update():
 			print("Player not created")
 	elif action == "board":
 		game.board.printBoard()
-	elif action == "addLetter":
-		letter = input("Enter letter: ")
-		value = numInput(input("Enter tile value: "))
-		x = numInput(input("Enter x (starting from 0 in top left): "))
-		y = numInput(input("Enter y (starting from 0 in top left): "))
-		if game.board.addLetter(letter, value, x, y):
-			print("Board updated")
-		# If addLetter returns False then x or y is out of range (specified in board.py)
-		else:
-			print("X and Y cannot be above 14 or ontop of another tile")
 	elif action == "letters":
 		game.tiles.printLetters()
 	elif action == "makePlayer":
@@ -133,14 +119,13 @@ def update():
 			game.players[playerIndex].takeLetters(game.tiles)
 		else:
 			print("Max player limit reached")
-	elif action == "takeLetters":
-		# Get the player index in array
-		player = game.players[numInput(input("Enter player number: ")) - 1]
-		player.takeLetters(game.tiles)
 	elif action == "playerLetters":
 		# Get the player index in array
 		player = game.players[numInput(input("Enter player number: ")) - 1]
-		player.printLetters()
+		if player != False:
+			player.printLetters()
+		else:
+			print("Player not created")
 	elif action == "playTurn":
 		if len(game.players) == 0:
 			print("No current players")
@@ -284,10 +269,8 @@ def update():
 		print("findWordsContains	-	Find all words you can make with a given set of characters + a set string")
 		print("findMoves		-	Find all words you can make with a given player and the board")
 		print("board			-	Display the current state of the board")
-		print("addLetter		-	Add a letter to the board")
 		print("letters			-	Display the current letters available to take")
 		print("makePlayer		-	Makes a new player (max 4)")
-		print("takeLetters		-	Fills up a specified players letters")
 		print("playerLetters		-	Prints the letters a given player has")
 		print("playTurn		-	Make a move for the current players turn")
 		print("activePlayer		-	Print the current active player")
