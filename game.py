@@ -291,10 +291,20 @@ class Board:
 									if x - i >= -1:  # -1 is used as starting position on the board is not used to place a tile
 										moves += self.extendLeft(x - i, y, 'right', player.letters, trie)
 
+							# If left is occupied and up is not
+							if left and not up:
+								if y - 1 >= -1:  # -1 is used as starting position on the board is not used to place a tile
+									moves += self.extendLeft(x, y - 1, 'down', player.letters, trie)
+
 							if down:
 								for i in range(8):
 									if y - i >= -1:  # -1 is used as starting position on the board is not used to place a tile
 										moves += self.extendLeft(x, y - i, 'down', player.letters, trie)
+
+							# If up is occupied and left is not
+							if up and not left:
+								if x - 1 >= -1:  # -1 is used as starting position on the board is not used to place a tile
+									moves += self.extendLeft(x - 1, y, 'right', player.letters, trie)
 
 		return moves
 

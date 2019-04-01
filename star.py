@@ -19,7 +19,8 @@ red = (255,0,0)
 lightRed = (255,102,102)
 blue = (0,128,255)
 lightBlue = (153,204,255)
-tile = (255,229,204)
+tile = (232,226,142)
+emptySpace = (62,115,69)
 clock = pygame.time.Clock()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -321,7 +322,7 @@ def render():
 				elif game.board.board[y - 1][x - 1] is 'TW':
 					gridItem(screen, red, black, 'TW', (WIDTH / 16) * x, (HEIGHT / 16) * y, 45, 45)
 				elif game.board.board[y - 1][x - 1] is None:
-					gridItem(screen, white, black, '', (WIDTH / 16) * x, (HEIGHT / 16) * y, 45, 45)
+					gridItem(screen, emptySpace, black, '', (WIDTH / 16) * x, (HEIGHT / 16) * y, 45, 45)
 				else:
 					gridItem(screen, tile, black, game.board.board[y - 1][x - 1][0].upper(), (WIDTH / 16) * x, (HEIGHT / 16) * y, 45, 45, str(game.board.board[y - 1][x - 1][1]))
 
