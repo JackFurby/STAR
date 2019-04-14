@@ -102,7 +102,7 @@ class Board:
 		self.playedTiles = 0"""
 		self.emptyTiles = [None, 'DL', 'DW', 'TL', 'TW']  # Type of spaces on the board that are empty
 
-	def extendLeft(self, x, y, direction, letters, trie, playedTiles=None, currentNode=None, TileClose=False, nextTile=None):
+	def extendLeft(self, x, y, direction, letters, trie, playedTiles=None, currentNode=None, TileClose=False, nextTile=None, extraScore=0):
 		"""Return moves that can be made given a starting position, player and direction."""
 		# list of all words found
 		words = []
@@ -124,7 +124,38 @@ class Board:
 				startX = x
 				startY = y - len(currentNode.data[0]) + 1 # end of word y coordinate - lengh of word found + 1 to correct offset
 
-			words.append([currentNode.data, startX, startY, direction, playedTiles])
+			# If all letters placed then add 50 to score
+			if len(playedTiles) is 7:
+				allLetters = 50
+			else:
+				allLetters = 0
+
+			# Score for the main new word
+			score = 0
+			multiplierTotal = 1
+			mainWord, mainWordList = self.getBoardSpaces(startX, startY, x, y, direction)
+			i = 0  # The index of the player tile currently being evaluated
+			for space in mainWordList:
+				if space not in self.emptyTiles:
+					score = score + mainWordList[i][1]
+				elif space is 'DL':
+					score = score + (letterScore(playedTiles[i][0]) * 2)
+					i += 1
+				elif space is 'DL':
+					score = score + (letterScore(playedTiles[i][0]) * 3)
+					i += 1
+				elif space is 'DW':
+					multiplierTotal += 2
+					i += 1
+				elif space is 'TW':
+					multiplierTotal += 3
+					i += 1
+				else:
+					score = score + letterScore(playedTiles[i][0])
+					i += 1
+			score = score * multiplierTotal
+
+			words.append([currentNode.data[0], extraScore + score + allLetters, startX, startY, direction, playedTiles])
 
 		nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.nextToTiles(x, y)
 
@@ -152,7 +183,7 @@ class Board:
 				# Copy value of letters and playedTiles (otherwise will run into problems with only copying memory address)
 				newLetters = letters.copy()
 				newPlayedTiles = playedTiles.copy()
-				words += self.extendLeft(nextX, nextY, direction, newLetters, trie, newPlayedTiles, currentNode.children[letter[0]], TileClose, nextLetter)
+				words += self.extendLeft(nextX, nextY, direction, newLetters, trie, newPlayedTiles, currentNode.children[letter[0]], TileClose, nextLetter, extraScore)
 		# add letter from player tiles into current word search
 		elif len(letters) is not 0:
 			if direction == 'right':
@@ -192,6 +223,7 @@ class Board:
 				for letter in letters:
 					if letter not in searched:
 						searched.append(letter)
+						blindWordScore = 0 # placeholder for score gain from blindCheckWord
 						if letter == '?':
 							for char in currentNode.children:
 
@@ -201,7 +233,7 @@ class Board:
 									if not TileClose:
 										TileClose = nextToTile
 									if up or down:
-										newWordAccepted = self.blindCheckWord(x + 1, y, char, 'down', trie, up, down)
+										newWordAccepted, blindWordScore = self.blindCheckWord(x + 1, y, [char, True], 'down', trie, up, down)
 									# Dont need to check if another word is valid
 									else:
 										newWordAccepted = True
@@ -210,7 +242,7 @@ class Board:
 									if not TileClose:
 										TileClose = nextToTile
 									if left or right:
-										newWordAccepted = self.blindCheckWord(x, y + 1, char, 'right', trie, left, right)
+										newWordAccepted, blindWordScore = self.blindCheckWord(x, y + 1, [char, True], 'right', trie, left, right)
 									# Dont need to check if another word is valid
 									else:
 										newWordAccepted = True
@@ -224,7 +256,7 @@ class Board:
 								if newWordAccepted:
 									newPlayedTiles = playedTiles.copy()
 									newPlayedTiles.append(['?', char])
-									words += self.extendLeft(nextX, nextY, direction, newLetters, trie, newPlayedTiles, currentNode.children[char], TileClose, nextLetter)
+									words += self.extendLeft(nextX, nextY, direction, newLetters, trie, newPlayedTiles, currentNode.children[char], TileClose, nextLetter, extraScore + blindWordScore)
 						elif letter in currentNode.children:
 
 							# If new tile creates a word in the other direction check it!
@@ -233,7 +265,7 @@ class Board:
 								if not TileClose:
 									TileClose = nextToTile
 								if up or down:
-									newWordAccepted = self.blindCheckWord(x + 1, y, letter, 'down', trie, up, down)
+									newWordAccepted, blindWordScore = self.blindCheckWord(x + 1, y, [letter, False], 'down', trie, up, down)
 								# Dont need to check if another word is valid
 								else:
 									newWordAccepted = True
@@ -242,7 +274,7 @@ class Board:
 								if not TileClose:
 									TileClose = nextToTile
 								if left or right:
-									newWordAccepted = self.blindCheckWord(x, y + 1, letter, 'right', trie, left, right)
+									newWordAccepted, blindWordScore = self.blindCheckWord(x, y + 1, [letter, False], 'right', trie, left, right)
 								# Dont need to check if another word is valid
 								else:
 									newWordAccepted = True
@@ -256,7 +288,7 @@ class Board:
 							if newWordAccepted:
 								newPlayedTiles = playedTiles.copy()
 								newPlayedTiles.append(letter)
-								words += self.extendLeft(nextX, nextY, direction, newLetters, trie, newPlayedTiles, currentNode.children[letter], TileClose, nextLetter)
+								words += self.extendLeft(nextX, nextY, direction, newLetters, trie, newPlayedTiles, currentNode.children[letter], TileClose, nextLetter, extraScore + blindWordScore)
 
 					i += 1
 
@@ -479,20 +511,24 @@ class Board:
 			wordList = wordListX[0]
 		else:
 			wordList = [item[0] for item in wordListX]
-		word = ''.join([item[0] for item in wordList])
+
+		wordListFormatted = [x for x in wordList if x is not None]  # Remove None from list
+		word = ''.join([item[0] for item in wordListFormatted])
 
 		return word, wordList
 
 	def blindCheckWord(self, x, y, letter, direction, trie, before, after):
 		"""
 		Will return true or false if the word to create is valid.
+		Will return the score gained from the new word
 
 		* x and y is the location of the tile to be placed
-		* the letter is a tile that is being placed (only the string char)
+		* the letter is a tile that is being placed and if the tile is blank or not (in the format [letter, True/False])
 		* direction can either be right or down and is the direction of the word
 		* before and after can be true or false and will show where the word on the board is (used with direction)
 
 		"""
+
 		# Get word placed on board before the tile to be placed
 		if before:
 			if direction == 'right':
@@ -503,8 +539,10 @@ class Board:
 				newY = y - 1
 			startX1, startY1, endX1, endY1 = self.findWordPosition(newX, newY, False, direction)
 			part1, wordList1 = self.getBoardSpaces(startX1, startY1, endX1, endY1, direction)
+			part1Score = sum(map(lambda x: int(x[1]), wordList1))  # Sum of tile scores before new tile
 		else:
 			part1 = ''
+			part1Score = 0
 
 		# Get word placed on board after the tile to be placed
 		if after:
@@ -516,21 +554,45 @@ class Board:
 				newY = y + 1
 			startX2, startY2, endX2, endY2 = self.findWordPosition(newX, newY, True, direction)
 			part2, wordList2 = self.getBoardSpaces(startX2, startY2, endX2, endY2, direction)
+			part2Score = sum(map(lambda x: int(x[1]), wordList2))  # Sum of tile scores after new tile
 		else:
 			part2 = ''
+			part2Score = 0
 
-		word = part1 + letter + part2  # construct word
+		# Get the word and letter multiplyer
+		if self.board[y][x] is 'DL':
+			multiplierTotal = 1
+			letterMultiplier = 2
+		elif self.board[y][x] is 'TL':
+			multiplierTotal = 1
+			letterMultiplier = 3
+		elif self.board[y][x] is 'DW':
+			multiplierTotal = 2
+			letterMultiplier = 1
+		elif self.board[y][x] is 'TW':
+			multiplierTotal = 3
+			letterMultiplier = 1
+		else:
+			multiplierTotal = 1
+			letterMultiplier = 1
+
+		word = part1 + letter[0] + part2  # construct word
+		# Change letter to blank (makes sure score caculation does not add points for blank)
+		if letter[1]:
+			letterChar = letter[0]
+		else:
+			letterChar = '?'
+		wordScore = (part1Score + part2Score + (letterScore(letterChar) * letterMultiplier)) * multiplierTotal  # Total word score
 
 		# checks if the word found is accepted
 		if trie.hasWord(word.lower()):
-			return True
+			return True, wordScore
 		else:
 			# If word is a single tile down count it (single tile words are not counted as words)
 			if len(word) == 1:
-				return True
+				return True, wordScore
 			else:
-				return False
-
+				return False, wordScore
 
 	def checkWord(self, x, y, direction, beginning, trie, placedWord):
 		"""Given the x, y, and if the word starts, ends or contains that tile will return true or false if the word is valid."""

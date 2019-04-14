@@ -102,7 +102,7 @@ def update():
 		if player != False:
 			start = time.time()
 			wordList = game.board.possibleMoves(player, game.trie)
-			#wordList.sort(key=lambda tup: -tup[1])
+			wordList.sort(key=lambda tup: -tup[1])
 			print(*wordList, sep='\n')
 			end = time.time()
 			print("Completed search in", end - start, 'seconds')
