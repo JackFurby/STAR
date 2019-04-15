@@ -849,7 +849,7 @@ class Tiles:
 		remaining = sum(map(lambda x: int(x[1]), self.letters))  # Number of tiles that are not in player racks or on board
 		tileProbabilities = []
 		for tile in range(len(self.letters)):
-			tileProbabilities.append([tile, self.letters[tile][0], (self.letters[tile][1]/remaining)])
+			tileProbabilities.append([tile, self.letters[tile][0], (self.letters[tile][1]/remaining)])  # [index of tile in self.letters, letter, probability]
 		return tileProbabilities
 
 
