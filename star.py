@@ -258,6 +258,11 @@ def update():
 			print("No current players")
 		else:
 			print("Player " + str(game.active + 1) + " it's your turn")
+	elif action == "probableTiles":
+		tileProbabilities = game.tiles.probableTiles()
+		for i in tileProbabilities:
+			print(i)
+
 	elif action == "help":
 		print("")
 		print("=== STAR help ===")
@@ -271,6 +276,7 @@ def update():
 		print("findMoves		-	Find all words you can make with a given player and the board")
 		print("board			-	Display the current state of the board")
 		print("letters			-	Display the current letters available to take")
+		print("probableTiles		-	Print a list of tiles not in play with the probability of picking that tile")
 		print("makePlayer		-	Makes a new player (max 4)")
 		print("playerLetters		-	Prints the letters a given player has")
 		print("playTurn		-	Make a move for the current players turn")

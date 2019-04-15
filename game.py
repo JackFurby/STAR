@@ -223,7 +223,7 @@ class Board:
 				for letter in letters:
 					if letter not in searched:
 						searched.append(letter)
-						blindWordScore = 0 # placeholder for score gain from blindCheckWord
+						blindWordScore = 0  # placeholder for score gain from blindCheckWord
 						if letter == '?':
 							for char in currentNode.children:
 
@@ -825,27 +825,17 @@ class Tiles:
 						['?', 2]]
 
 		# Available letters that have not been played or held by a player
-		self.letters = []
-
-		# Fills array of letters with all tiles for a game in a random order
-		while len(startingLetters) > 0:
-			index = random.randint(0, len(startingLetters) - 1)
-			# If the last letter is being added then remove it from the array
-			if startingLetters[index][1] == 1:
-				letter = startingLetters[index][0]
-				del startingLetters[index]
-			else:
-				letter = startingLetters[index][0]
-				startingLetters[index][1] = startingLetters[index][1] - 1
-
-			self.letters.append(letter)
+		self.letters = startingLetters.copy()
 
 	def takeLetter(self):
 		"""Remove a letter from self.letters and return it."""
-		if len(self.letters) > 0:
+		if sum(map(lambda x: int(x[1]), self.letters)):  # Sum of all tiles not in play
 			index = random.randint(0, len(self.letters) - 1)
-			letter = self.letters[index]
-			del self.letters[index]
+			letter = self.letters[index][0]
+			self.letters[index][1] -= 1
+			# If last tile for a character has been taken remove it from letters
+			if self.letters[index][1] < 1:
+				del self.letters[index]
 			return letter
 		else:
 			return None
@@ -853,6 +843,14 @@ class Tiles:
 	def printLetters(self):
 		"""Print the current letters not taken in the game."""
 		print(self.letters)
+
+	def probableTiles(self):
+		"""Return the most probable tiles (specified by amount) to be taken."""
+		remaining = sum(map(lambda x: int(x[1]), self.letters))  # Number of tiles that are not in player racks or on board
+		tileProbabilities = []
+		for tile in range(len(self.letters)):
+			tileProbabilities.append([tile, self.letters[tile][0], (self.letters[tile][1]/remaining)])
+		return tileProbabilities
 
 
 class Player:
