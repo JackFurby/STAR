@@ -4,6 +4,7 @@ from trie import Trie
 from setup import setup, save_trie, load_trie
 import copy
 
+
 class Game:
 	"""Scrabble game env."""
 
@@ -13,6 +14,7 @@ class Game:
 		self.players = []
 		self.tiles = Tiles()
 		self.active = 0
+		self.over = False  # True if the game is over
 		# trie = Trie()
 		# setup(trie)
 		# save_trie(trie, 'v1')
@@ -136,12 +138,13 @@ class Board:
 			mainWord, mainWordList = self.getBoardSpaces(startX, startY, x, y, direction)
 			i = 0  # The index of the player tile currently being evaluated
 			for space in mainWordList:
-				if space not in self.emptyTiles:
-					score = score + mainWordList[i][1]
+				if space is None:
+					score = score + letterScore(playedTiles[i][0])
+					i += 1
 				elif space is 'DL':
 					score = score + (letterScore(playedTiles[i][0]) * 2)
 					i += 1
-				elif space is 'DL':
+				elif space is 'TL':
 					score = score + (letterScore(playedTiles[i][0]) * 3)
 					i += 1
 				elif space is 'DW':
@@ -151,8 +154,7 @@ class Board:
 					multiplierTotal += 3
 					i += 1
 				else:
-					score = score + letterScore(playedTiles[i][0])
-					i += 1
+					score = score + space[1]
 			score = score * multiplierTotal
 
 			words.append([currentNode.data[0], extraScore + score + allLetters, startX, startY, direction, playedTiles])
@@ -167,16 +169,22 @@ class Board:
 		else:
 			nextSpace = down
 
-		# If current space is occupied then add it into the current word search and move on
+		# If current space is occupied then add it onto the current word search and move on
 		if nextSpace:
 			if direction == 'right':
 				letter = self.board[y][x + 1]
-				nextLetter = self.board[y][x + 2]
+				if x + 2 < len(self.board[y]):
+					nextLetter = self.board[y][x + 2]
+				else:
+					nextLetter = None
 				nextX = x + 1
 				nextY = y
 			else:
 				letter = self.board[y + 1][x]
-				nextLetter = self.board[y + 2][x]
+				if y + 2 < len(self.board):
+					nextLetter = self.board[y + 2][x]
+				else:
+					nextLetter = None
 				nextX = x
 				nextY = y + 1
 			if letter[0] in currentNode.children:
@@ -233,7 +241,7 @@ class Board:
 									if not TileClose:
 										TileClose = nextToTile
 									if up or down:
-										newWordAccepted, blindWordScore = self.blindCheckWord(x + 1, y, [char, True], 'down', trie, up, down)
+										newWordAccepted, blindWordScore = self.blindCheckWord(x + 1, y, [char, letterScore(char)], 'down', trie, up, down)
 									# Dont need to check if another word is valid
 									else:
 										newWordAccepted = True
@@ -242,7 +250,7 @@ class Board:
 									if not TileClose:
 										TileClose = nextToTile
 									if left or right:
-										newWordAccepted, blindWordScore = self.blindCheckWord(x, y + 1, [char, True], 'right', trie, left, right)
+										newWordAccepted, blindWordScore = self.blindCheckWord(x, y + 1, [char, letterScore(char)], 'right', trie, left, right)
 									# Dont need to check if another word is valid
 									else:
 										newWordAccepted = True
@@ -255,7 +263,7 @@ class Board:
 								del newLetters[i]
 								if newWordAccepted:
 									newPlayedTiles = playedTiles.copy()
-									newPlayedTiles.append(['?', char])
+									newPlayedTiles.append([char, 0, '?'])
 									words += self.extendLeft(nextX, nextY, direction, newLetters, trie, newPlayedTiles, currentNode.children[char], TileClose, nextLetter, extraScore + blindWordScore)
 						elif letter in currentNode.children:
 
@@ -265,7 +273,7 @@ class Board:
 								if not TileClose:
 									TileClose = nextToTile
 								if up or down:
-									newWordAccepted, blindWordScore = self.blindCheckWord(x + 1, y, [letter, False], 'down', trie, up, down)
+									newWordAccepted, blindWordScore = self.blindCheckWord(x + 1, y, [letter, letterScore(letter)], 'down', trie, up, down)
 								# Dont need to check if another word is valid
 								else:
 									newWordAccepted = True
@@ -274,7 +282,7 @@ class Board:
 								if not TileClose:
 									TileClose = nextToTile
 								if left or right:
-									newWordAccepted, blindWordScore = self.blindCheckWord(x, y + 1, [letter, False], 'right', trie, left, right)
+									newWordAccepted, blindWordScore = self.blindCheckWord(x, y + 1, [letter, letterScore(letter)], 'right', trie, left, right)
 								# Dont need to check if another word is valid
 								else:
 									newWordAccepted = True
@@ -287,7 +295,7 @@ class Board:
 							del newLetters[i]
 							if newWordAccepted:
 								newPlayedTiles = playedTiles.copy()
-								newPlayedTiles.append(letter)
+								newPlayedTiles.append([letter, letterScore(letter)])
 								words += self.extendLeft(nextX, nextY, direction, newLetters, trie, newPlayedTiles, currentNode.children[letter], TileClose, nextLetter, extraScore + blindWordScore)
 
 					i += 1
@@ -577,12 +585,7 @@ class Board:
 			letterMultiplier = 1
 
 		word = part1 + letter[0] + part2  # construct word
-		# Change letter to blank (makes sure score caculation does not add points for blank)
-		if letter[1]:
-			letterChar = letter[0]
-		else:
-			letterChar = '?'
-		wordScore = (part1Score + part2Score + (letterScore(letterChar) * letterMultiplier)) * multiplierTotal  # Total word score
+		wordScore = (part1Score + part2Score + (letter[1] * letterMultiplier)) * multiplierTotal  # Total word score
 
 		# checks if the word found is accepted
 		if trie.hasWord(word.lower()):
@@ -786,7 +789,50 @@ class Board:
 	def printBoard(self):
 		"""Print the current state of the board."""
 		for row in self.board:
-			print(row)
+			print(*row, sep='\t')
+
+	def lookAhead(self, game, player, currentMoves=None):
+		"""Given a player (whos turn it is), return the moves to finish with the highest score."""
+
+
+		"""
+			This function does not work. It does not play well with copy.copy and deepcopy taks a long time to complete.
+			May return to this issue at some point
+		"""
+
+
+
+		# list of all moves found
+		moves = []
+
+		print(game.board.printBoard())
+		print(game.tiles.letters)
+		if game.over:
+			moves.append(currentMoves)
+		else:
+			# No maves made yet
+			if currentMoves is None:
+				currentMoves = []
+
+			# Refill player tiles with most probable tiles
+			player.takeProbableLetters(game.tiles)
+
+			# Get all playable moves
+			canPlay = self.possibleMoves(player, game.trie)
+
+			# Try each playable move
+			searched = []
+			for move in canPlay:
+				if move not in searched:
+					searched.append(move)
+					gameCopy = copy.copy(game)
+					playerCopy = copy.copy(player)
+					tilesAdded, score = game.board.addWord(move[5], move[2], move[3], move[4], game.trie, player)
+					currentMoves.append(move)
+					moves += self.lookAhead(gameCopy, playerCopy, currentMoves)
+
+		# return moves found
+		return moves
 
 
 class Tiles:
@@ -840,6 +886,20 @@ class Tiles:
 		else:
 			return None
 
+	def takeProbableLetter(self):
+		"""Remove a most probable letter from self.letters and return it."""
+		if sum(map(lambda x: int(x[1]), self.letters)):  # Sum of all tiles not in play
+			allProbableTile = self.probableTiles().sort(key=lambda tup: -tup[1])
+			index = allProbableTile[0][0]
+			letter = self.letters[index][0]
+			self.letters[index][1] -= 1
+			# If last tile for a character has been taken remove it from letters
+			if self.letters[index][1] < 1:
+				del self.letters[index]
+			return letter
+		else:
+			return None
+
 	def printLetters(self):
 		"""Print the current letters not taken in the game."""
 		print(self.letters)
@@ -866,6 +926,12 @@ class Player:
 		for i in range(len(self.letters)):
 			if self.letters[i] is None:
 				self.letters[i] = gameLetters.takeLetter()
+
+	def takeProbableLetters(self, gameLetters):
+		"""Add most probable letter to player until player has 7 letters."""
+		for i in range(len(self.letters)):
+			if self.letters[i] is None:
+				self.letters[i] = gameLetters.takeProbableLetter()
 
 	def swapLetters(self, game, swapTiles):
 		"""Swap refill player letters and add swapLetters back into board letters."""

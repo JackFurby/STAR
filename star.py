@@ -108,6 +108,17 @@ def update():
 			print("Completed search in", end - start, 'seconds')
 		else:
 			print("Player not created")
+	elif action == "lookAhead":
+		if len(game.players) > 0:
+			start = time.time()
+			player = game.players[game.active]
+			moveList = game.board.lookAhead(game, player)
+			wordList.sort(key=lambda tup: -tup[1])
+			print(*moveList, sep='\n')
+			end = time.time()
+			print("Completed search in", end - start, 'seconds')
+		else:
+			print("No players created")
 	elif action == "board":
 		game.board.printBoard()
 	elif action == "letters":
@@ -235,12 +246,11 @@ def update():
 			player.takeLetters(game.tiles)
 
 			# If player has no tiles after refilling there are not tiles left. Game ends
-			emptyTiles = True
 			for tile in player.letters:
-				if tile is not None:
-					emptyTiles = False
+				if tile is None:
+					game.over = True
 
-			if emptyTiles:
+			if game.over:
 				print("")
 				print("=== Game Over ===")
 				print("")
@@ -274,6 +284,7 @@ def update():
 		print("findWordsSuffix		-	Find all words you can make with a given set of characters + a suffix")
 		print("findWordsContains	-	Find all words you can make with a given set of characters + a set string")
 		print("findMoves		-	Find all words you can make with a given player and the board")
+		print("lookAhead		-	Return the best moves to make to win a game (Not working)")
 		print("board			-	Display the current state of the board")
 		print("letters			-	Display the current letters available to take")
 		print("probableTiles		-	Print a list of tiles not in play with the probability of picking that tile")
