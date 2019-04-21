@@ -112,8 +112,8 @@ def update():
 		if len(game.players) > 0:
 			start = time.time()
 			player = game.players[game.active]
-			moveList = game.board.lookAhead(game, player)
-			wordList.sort(key=lambda tup: -tup[1])
+			moveList = game.board.lookAhead(game.board, game.tiles, player, game.trie)
+			moveList.sort(key=lambda tup: -tup[1])
 			print(*moveList, sep='\n')
 			end = time.time()
 			print("Completed search in", end - start, 'seconds')
