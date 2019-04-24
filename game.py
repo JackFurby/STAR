@@ -860,7 +860,7 @@ class Tiles:
 	def __init__(self):
 		"""Initilise the board."""
 
-		# Available letters that have not been played or held by a player
+		# Available tiles that have not been played or held by a player
 		self.letters = [
 						['a', 9],
 						['b', 2],
@@ -889,6 +889,9 @@ class Tiles:
 						['y', 2],
 						['z', 1],
 						['?', 2]]
+		self.startingTileCount = sum(map(lambda x: int(x[1]), self.letters))  # Number of tiles in the game
+
+		self.startingTiles = copy.deepcopy(self.letters)  # Starting tiles in the game
 
 	def copy(self):
 		return copy.deepcopy(self)
@@ -924,13 +927,56 @@ class Tiles:
 		"""Print the current letters not taken in the game."""
 		print(self.letters)
 
-	def probableTiles(self):
-		"""Return the most probable tiles (specified by amount) to be taken."""
-		remaining = sum(map(lambda x: int(x[1]), self.letters))  # Number of tiles that are not in player racks or on board
+	def getTileProbability(self, tiles):
+		"""Return an array of tiles and probabilities."""
+		remaining = sum(map(lambda x: int(x[1]), tiles))  # Number of tiles that are not on the board
 		tileProbabilities = []
-		for tile in range(len(self.letters)):
-			tileProbabilities.append([tile, self.letters[tile][0], (self.letters[tile][1]/remaining)])  # [index of tile in self.letters, letter, probability]
+		for tile in range(len(tiles)):
+			tileProbabilities.append([tile, tiles[tile][0], (tiles[tile][1]/remaining)])  # [index of tile in self.letters, letter, probability]
 		return tileProbabilities
+
+	def probableTiles(self, board):
+		"""Return all tiles with probability of being taken."""
+
+		# Tiles and quantity not on the board
+		remainingTiles = copy.deepcopy(self.startingTiles)
+		for y in range(len(board.board)):
+			for x in range(len(board.board[y])):
+				if board.board[y][x] not in board.emptyTiles:
+					if board.board[y][x][1] is 0:  # Blank tile
+						tile = '?'
+					else:
+						tile = board.board[y][x][0]
+					# Update remainingTiles
+					for element in remainingTiles:
+						if element[0] is tile:
+							element[1] -= 1
+
+		return self.getTileProbability(remainingTiles)
+
+	def probableTilesWithPlayer(self, board, player):
+		"""Return all tiles with probability of being taken (taking into account a specified player)."""
+
+		# Tiles and quantity not on the board
+		remainingTiles = copy.deepcopy(self.startingTiles)
+		for y in range(len(board.board)):
+			for x in range(len(board.board[y])):
+				if board.board[y][x] not in board.emptyTiles:
+					if board.board[y][x][1] is 0:  # Blank tile
+						tile = '?'
+					else:
+						tile = board.board[y][x][0]
+					# Update remainingTiles
+					for element in remainingTiles:
+						if element[0] is tile:
+							element[1] -= 1
+
+		for tile in player.letters:
+			for element in remainingTiles:
+				if element[0] is tile:
+					element[1] -= 1
+
+		return self.getTileProbability(remainingTiles)
 
 
 class Player:

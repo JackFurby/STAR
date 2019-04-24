@@ -28,14 +28,13 @@ class Tree:
 class State:
 	"""A state the game is in."""
 
-	def __init__(self, board, tiles, playerNo, move):
+	def __init__(self, board, tiles, playerNo, playerTiles, move):
 		"""Initilise the state."""
-		self.board = board
-		self.tiles = tiles
-		self.playerNo = playerNo
-		self.visitCount = 0
-		self.winScore = 0
-		self.move = move
+		self.board = board  # Copy of the board object
+		self.tiles = tiles  # Copy of the tiles still in play (not in a player rack)
+		self.playerNo = playerNo  # Number of players in the game
+		self.playerTiles = playerTiles  # Current player rack
+		self.winScore = 0  # Score of best game from that node (known)
 
 
 class MonteCarloTreeSearch:
