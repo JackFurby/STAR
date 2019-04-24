@@ -1,7 +1,7 @@
 class Node:
 	"""Node object for trie."""
 
-	# children contains linkks to other nodes
+	# children contains links to other nodes
 	# data contains word if node is the end of a word
 	# end indicates if the current node is the end of a word
 	def __init__(self, end=False, data=None):

@@ -70,7 +70,7 @@ class Board:
 	def __init__(self):
 		"""Initilise the board."""
 
-		self.board = [['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW'],
+		"""self.board = [['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW'],
 					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
 					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
 					['DL', None, None, 'DW', None, None, None, 'DL', None, None, None, 'DW', None, None, 'DL'],
@@ -85,9 +85,9 @@ class Board:
 					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
 					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW']]
-		self.playedTiles = 7
+		self.playedTiles = 7"""
 
-		"""self.board = [
+		self.board = [
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW'],
 					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
 					[None, None, 'DW', None, None, None, 'DL', None, 'DL', None, None, None, 'DW', None, None],
@@ -104,7 +104,7 @@ class Board:
 					[None, 'DW', None, None, None, 'TL', None, None, None, 'TL', None, None, None, 'DW', None],
 					['TW', None, None, 'DL', None, None, None, 'TW', None, None, None, 'DL', None, None, 'TW']
 					]
-		self.playedTiles = 0"""
+		self.playedTiles = 0
 		self.emptyTiles = [None, 'DL', 'DW', 'TL', 'TW']  # Type of spaces on the board that are empty
 
 	def copy(self):
@@ -169,7 +169,10 @@ class Board:
 		nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.nextToTiles(x, y)
 
 		if not TileClose:
-			TileClose = nextToTile
+			if x == 7 and y == 7:  # If playing on center of board (i.e. first word played)
+				TileClose = True
+			else:
+				TileClose = nextToTile
 
 		if direction == 'right':
 			nextSpace = right
@@ -320,15 +323,12 @@ class Board:
 		for i in range(len(player.letters)):
 			playerLetters.append([player.letters[i], i])
 
+		# If no words played then only check words going over the center of the board (7, 7)
 		if self.playedTiles == 0:
-			words = trie.wordSearch(player.letters)
-			# Get all moves (all words and placements)
-			for word in words:
-				for x in range(len(word[0])):
-					moves.append([word, 7 - x, 7, 'right'])  # [word + score, x, y, direction]
-				for y in range(len(word[0])):
-					moves.append([word, 7, 7 - y, 'down'])
-			return moves
+			nextToTile, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.nextToTiles(7, 7)
+			for i in range(8):
+				moves += self.extendLeft(6 - i, 7, 'right', playerLetters, trie)
+				moves += self.extendLeft(7, 6 - i, 'down', playerLetters, trie)
 		# If there are tiles on the board include them in the possible moves
 		else:
 			# Search the board for empty positions next to tiles in play
@@ -804,7 +804,7 @@ class Board:
 			print(*row, sep='\t')
 
 	def lookAhead(self, board, tiles, player, trie, depth=0):
-		""""""
+		"""Take a copy of the game and recursivly play all possible moves."""
 		boardCopy = board.copy()
 		tilesCopy = tiles.copy()
 		playerCopy = player.copy()
