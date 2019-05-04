@@ -178,7 +178,7 @@ def update():
 								print("letters removed: " + str(swapTiles))
 								if len(swapTiles) == 7:  # swap all tiles
 									player.takeLetters(game.tiles)
-									game.tiles.letters.extend(swapTiles)
+									game.tiles.returnTiles(swapTiles)
 									stillEntering = False
 						else:
 							print("Input out of range")

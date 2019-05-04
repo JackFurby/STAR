@@ -862,34 +862,34 @@ class Tiles:
 
 		# Available tiles that have not been played or held by a player
 		self.letters = [
-						['a', 9],
-						['b', 2],
-						['c', 2],
-						['d', 4],
-						['e', 12],
-						['f', 2],
-						['g', 3],
-						['h', 2],
-						['i', 9],
-						['j', 1],
-						['k', 1],
-						['l', 4],
-						['m', 2],
-						['n', 6],
-						['o', 8],
-						['p', 2],
-						['q', 1],
-						['r', 6],
-						['s', 4],
-						['t', 6],
-						['u', 4],
-						['v', 2],
-						['w', 2],
-						['x', 1],
-						['y', 2],
-						['z', 1],
-						['?', 2]]
-		self.startingTileCount = sum(map(lambda x: int(x[1]), self.letters))  # Number of tiles in the game
+						[0, 'a', 9],
+						[1, 'b', 2],
+						[2, 'c', 2],
+						[3, 'd', 4],
+						[4, 'e', 12],
+						[5, 'f', 2],
+						[6, 'g', 3],
+						[7, 'h', 2],
+						[8, 'i', 9],
+						[9, 'j', 1],
+						[10, 'k', 1],
+						[11, 'l', 4],
+						[12, 'm', 2],
+						[13, 'n', 6],
+						[14, 'o', 8],
+						[15, 'p', 2],
+						[16, 'q', 1],
+						[17, 'r', 6],
+						[18, 's', 4],
+						[19, 't', 6],
+						[20, 'u', 4],
+						[21, 'v', 2],
+						[22, 'w', 2],
+						[23, 'x', 1],
+						[24, 'y', 2],
+						[25, 'z', 1],
+						[26, '?', 2]]
+		self.startingTileCount = sum(map(lambda x: int(x[2]), self.letters))  # Number of tiles in the game
 
 		self.startingTiles = copy.deepcopy(self.letters)  # Starting tiles in the game
 
@@ -898,26 +898,31 @@ class Tiles:
 
 	def takeLetter(self):
 		"""Remove a letter from self.letters and return it."""
-		if sum(map(lambda x: int(x[1]), self.letters)):  # Sum of all tiles not in play
-			index = random.randint(0, len(self.letters) - 1)
-			letter = self.letters[index][0]
-			self.letters[index][1] -= 1
-			# If last tile for a character has been taken remove it from letters
-			if self.letters[index][1] < 1:
-				del self.letters[index]
-			return letter
+		if sum(map(lambda x: int(x[2]), self.letters)):  # Sum of all tiles not in play
+			remainingTiles = [num for num in self.letters if num[2] > 0] # List of all tiles available to take
+			index = random.randint(0, len(remainingTiles) - 1)
+			letter = remainingTiles[index]
+			self.letters[letter[0]][2] -= 1
+			return letter[1] # Only return char
 		else:
 			return None
 
-	def takeProbableLetter(self):
-		"""Remove a most probable letter from self.letters and return it."""
-		if sum(map(lambda x: int(x[1]), self.letters)):  # Sum of all tiles not in play
+	def returnTiles(self, tiles):
+		"""Add tiles back into self.letters array."""
+		for tile in tiles:
+			for gameTile in self.letters:
+				if tile is gameTile[1]:
+					gameTile[2] += 1
+
+	def takeProbableLetter(self, player):
+		"""Remove a most probable tile from self.letters and return it."""
+		if sum(map(lambda x: int(x[2]), self.letters)):  # Sum of all tiles not in play
 			allProbableTile = sorted(self.probableTiles(), key=lambda x: -x[2])
 			index = allProbableTile[0][0]
 			letter = self.letters[index][0]
-			self.letters[index][1] -= 1
+			self.letters[index][2] -= 1
 			# If last tile for a character has been taken remove it from letters
-			if self.letters[index][1] < 1:
+			if self.letters[index][2] < 1:
 				del self.letters[index]
 			return letter
 		else:
@@ -929,10 +934,10 @@ class Tiles:
 
 	def getTileProbability(self, tiles):
 		"""Return an array of tiles and probabilities."""
-		remaining = sum(map(lambda x: int(x[1]), tiles))  # Number of tiles that are not on the board
+		remaining = sum(map(lambda x: int(x[2]), tiles))  # Number of tiles that are not on the board
 		tileProbabilities = []
 		for tile in range(len(tiles)):
-			tileProbabilities.append([tile, tiles[tile][0], (tiles[tile][1]/remaining)])  # [index of tile in self.letters, letter, probability]
+			tileProbabilities.append([tile, tiles[tile][1], (tiles[tile][2]/remaining)])  # [index of tile in self.letters, letter, probability]
 		return tileProbabilities
 
 	def probableTiles(self, board):
@@ -973,8 +978,8 @@ class Tiles:
 
 		for tile in player.letters:
 			for element in remainingTiles:
-				if element[0] is tile:
-					element[1] -= 1
+				if element[1] is tile:
+					element[2] -= 1
 
 		return self.getTileProbability(remainingTiles)
 
@@ -1005,7 +1010,7 @@ class Player:
 	def swapLetters(self, game, swapTiles):
 		"""Swap refill player letters and add swapLetters back into board letters."""
 		self.takeLetters(game.tiles)
-		game.tiles.letters.extend(swapTiles)
+		game.tiles.returnTiles(swapTiles)
 
 	def printLetters(self):
 		"""Print the current letters the player has to use."""
