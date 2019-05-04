@@ -940,9 +940,8 @@ class Tiles:
 			tileProbabilities.append([tile, tiles[tile][1], (tiles[tile][2]/remaining)])  # [index of tile in self.letters, letter, probability]
 		return tileProbabilities
 
-	def probableTiles(self, board):
-		"""Return all tiles with probability of being taken."""
-
+	def getRemainingTiles(self, board, player=None):
+		"""Return a list of tiles that could be remaining in the game (we only know board and current player)."""
 		# Tiles and quantity not on the board
 		remainingTiles = copy.deepcopy(self.startingTiles)
 		for y in range(len(board.board)):
@@ -957,31 +956,40 @@ class Tiles:
 						if element[0] is tile:
 							element[1] -= 1
 
+		# If player is included also remove their tiles
+		if player:
+			for tile in player.letters:
+				for element in remainingTiles:
+					if element[1] is tile:
+						element[2] -= 1
+
+		return remainingTiles
+
+	def probableTiles(self, board):
+		"""Return all tiles with probability of being taken."""
+
+		remainingTiles = self.getRemainingTiles(board)
 		return self.getTileProbability(remainingTiles)
 
 	def probableTilesWithPlayer(self, board, player):
 		"""Return all tiles with probability of being taken (taking into account a specified player)."""
 
-		# Tiles and quantity not on the board
-		remainingTiles = copy.deepcopy(self.startingTiles)
-		for y in range(len(board.board)):
-			for x in range(len(board.board[y])):
-				if board.board[y][x] not in board.emptyTiles:
-					if board.board[y][x][1] is 0:  # Blank tile
-						tile = '?'
-					else:
-						tile = board.board[y][x][0]
-					# Update remainingTiles
-					for element in remainingTiles:
-						if element[0] is tile:
-							element[1] -= 1
-
-		for tile in player.letters:
-			for element in remainingTiles:
-				if element[1] is tile:
-					element[2] -= 1
-
+		remainingTiles = self.getRemainingTiles(board, player)
 		return self.getTileProbability(remainingTiles)
+
+	def nextProbablePlayer(self, board, player):
+		"""Return an array of the 7 most probable tiles to be picked (what the next player probably has)."""
+		playerTiles = []
+
+		# work out what tiles might be available with probability
+		remainingTiles = self.getRemainingTiles(board, player)
+
+		for i in range(7):
+			probableTile = sorted(self.getTileProbability(remainingTiles), key=lambda x: -x[2])[0]
+			playerTiles.append(probableTile[1])
+			remainingTiles[probableTile[0]][2] -= 1
+
+		return playerTiles
 
 
 class Player:

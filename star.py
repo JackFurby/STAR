@@ -277,6 +277,10 @@ def update():
 		tileProbabilities = game.tiles.probableTilesWithPlayer(game.board, player)
 		for i in tileProbabilities:
 			print(i)
+	elif action == "nextPlayerTiles":
+		player = game.getPlayer(numInput(input("Enter player number: ")) - 1)
+		probablePlayerTiles = game.tiles.nextProbablePlayer(game.board, player)
+		print(probablePlayerTiles)
 
 
 	elif action == "help":
@@ -295,6 +299,7 @@ def update():
 		print("letters			-	Display the current letters available to take")
 		print("probableTiles		-	Print a list of tiles not on the board with the probability of picking that tile")
 		print("probableTilesWithPlayer	-	Print a list of tiles not on the board or on players rack with the probability of picking that tile")
+		print("nextPlayerTiles		- 	Print a list of tiles that are most probable for the next player to have")
 		print("makePlayer		-	Makes a new player (max 4)")
 		print("playerLetters		-	Prints the letters a given player has")
 		print("playTurn		-	Make a move for the current players turn")
