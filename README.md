@@ -116,9 +116,11 @@ findWordsPrefix		-	Find all words you can make with a given set of characters + 
 findWordsSuffix		-	Find all words you can make with a given set of characters + a suffix
 findWordsContains	-	Find all words you can make with a given set of characters + a set string
 findMoves		-	Find all words you can make with a given player and the board
+lookAhead		-	Return the best moves to make to win a game (Not working)
 board			-	Display the current state of the board
 letters			-	Display the current letters available to take
-probableTiles		-	Print a list of tiles not in play with the probability of picking that tile
+probableTiles		-	Print a list of tiles not on the board with the probability of picking that tile
+probableTilesWithPlayer	-	Print a list of tiles not on the board or on players rack with the probability of picking that tile
 makePlayer		-	Makes a new player (max 4)
 playerLetters		-	Prints the letters a given player has
 playTurn		-	Make a move for the current players turn
