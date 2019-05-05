@@ -899,9 +899,13 @@ class Tiles:
 	def takeLetter(self):
 		"""Remove a letter from self.letters and return it."""
 		if sum(map(lambda x: int(x[2]), self.letters)):  # Sum of all tiles not in play
-			remainingTiles = [num for num in self.letters if num[2] > 0] # List of all tiles available to take
-			index = random.randint(0, len(remainingTiles) - 1)
-			letter = remainingTiles[index]
+			remainingTiles = [num for num in self.letters if num[2] > 0] # List of all tiles available to take with quantity
+			remainingTilesComplete = []  # list of all tiles (individual)
+			for i in remainingTiles:
+				for j in range(i[2]):
+					remainingTilesComplete.append([i[0], i[1]])  # [index of letter in self.letters, char]
+			index = random.randint(0, len(remainingTilesComplete) - 1)
+			letter = remainingTilesComplete[index]
 			self.letters[letter[0]][2] -= 1
 			return letter[1] # Only return char
 		else:
