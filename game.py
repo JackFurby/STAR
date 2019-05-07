@@ -313,15 +313,15 @@ class Board:
 		# return words found
 		return words
 
-	def possibleMoves(self, player, trie):
-		"""Return all possible moves a given player can make with the current board and player tiles."""
+	def possibleMoves(self, playerRack, trie):
+		"""Return all possible moves a given players rack can make with the current board and player tiles."""
 		# If board is empty return words from players tiles in all posible moves
 		moves = []
 
 		# Get player letters with index of each tile
 		playerLetters = []
-		for i in range(len(player.letters)):
-			playerLetters.append([player.letters[i], i])
+		for i in range(len(playerRack)):
+			playerLetters.append([playerRack[i], i])
 
 		# If no words played then only check words going over the center of the board (7, 7)
 		if self.playedTiles == 0:
@@ -900,7 +900,7 @@ class Tiles:
 		"""Remove a letter from self.letters and return it."""
 		if sum(map(lambda x: int(x[2]), self.letters)):  # Sum of all tiles not in play
 			remainingTiles = [num for num in self.letters if num[2] > 0] # List of all tiles available to take with quantity
-			remainingTilesComplete = []  # list of all tiles (individual)
+			remainingTilesComplete = []  # list of all tiles (individual) - Makes it more like real life in terms of probability
 			for i in remainingTiles:
 				for j in range(i[2]):
 					remainingTilesComplete.append([i[0], i[1]])  # [index of letter in self.letters, char]
