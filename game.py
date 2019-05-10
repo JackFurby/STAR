@@ -944,7 +944,7 @@ class Tiles:
 			tileProbabilities.append([tile, tiles[tile][1], (tiles[tile][2]/remaining)])  # [index of tile in self.letters, letter, probability]
 		return tileProbabilities
 
-	def getRemainingTiles(self, board, player=None):
+	def getRemainingTiles(self, board, playerLetters=None):
 		"""Return a list of tiles that could be remaining in the game (we only know board and current player)."""
 		# Tiles and quantity not on the board
 		remainingTiles = copy.deepcopy(self.startingTiles)
@@ -961,8 +961,8 @@ class Tiles:
 							element[1] -= 1
 
 		# If player is included also remove their tiles
-		if player:
-			for tile in player.letters:
+		if playerLetters:
+			for tile in playerLetters:
 				for element in remainingTiles:
 					if element[1] is tile:
 						element[2] -= 1
@@ -981,19 +981,24 @@ class Tiles:
 		remainingTiles = self.getRemainingTiles(board, player)
 		return self.getTileProbability(remainingTiles)
 
-	def nextProbablePlayer(self, board, player):
-		"""Return an array of the 7 most probable tiles to be picked (what the next player probably has)."""
-		playerTiles = []
+	def getProbableTiles(self, board, numberOfTiles, currentPlayerTiles):
+		"""Return an array of the X most probable tiles to be picked."""
+		probableTiles = []
 
 		# work out what tiles might be available with probability
-		remainingTiles = self.getRemainingTiles(board, player)
+		remainingTiles = self.getRemainingTiles(board, currentPlayerTiles)
 
-		for i in range(7):
+		for i in range(numberOfTiles):
 			probableTile = sorted(self.getTileProbability(remainingTiles), key=lambda x: -x[2])[0]
-			playerTiles.append(probableTile[1])
+			probableTiles.append(probableTile[1])
 			remainingTiles[probableTile[0]][2] -= 1
 
-		return playerTiles
+		return probableTiles, remainingTiles
+
+	def nextProbablePlayer(self, board, player):
+		"""Return an array of the 7 most probable tiles to be picked (what the next player probably has)."""
+		probableTiles, remainingTiles = self.getProbableTiles(board, 7, player.letters)
+		return probableTiles
 
 
 class Player:

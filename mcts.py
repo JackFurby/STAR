@@ -39,10 +39,25 @@ class Node:
 
 			for i in self.state.moves:
 				updatedPlayers = copy.deepcopy(self.state.players)
-				updatedPlayers[self.state.currentPlayer][1] += i[1]
+				updatedBoard = copy.deepcopy(self.state.board)
+				updatedTiles = copy.deepcopy(self.state.tiles)
+
+				# Convert tiles into a format that can be placed on the board + place tiles
+				playerTiles = []
+				for tile in i[5]:
+					playerTiles.append([tile[1], tile[2]])
+					del updatedPlayers[self.state.currentPlayer][0][tile[0]]  # Remove tile from player
+				updatedBoard.addLetters(playerTiles, i[2], i[3], i[4], self.trie)  # Add word to board (we already have score so dont need to run addWord)
+
+				# Update player tiles + game tiles
+				newTiles, updatedTiles = updatedTiles.getProbableTiles(updatedBoard, len(i[5]), updatedPlayers[0])
+				updatedPlayers[self.state.currentPlayer][0] += newTiles
+
+				updatedPlayers[self.state.currentPlayer][1] += i[1]  # Add move score to player
+
 				self.children.append(State(
-					self.state.board,
-					self.state.tiles,
+					updatedBoard,
+					updatedTiles,
 					updatedPlayers,
 					nextPlayer,
 					self.trie,
@@ -74,7 +89,7 @@ class MonteCarloTreeSearch:
 		"""Initilise search."""
 		self.trie = trie
 		self.tree = Tree(State(board, tiles, players, currentPlayer, self.trie, targetPlayer), None)
-		self. tree.root.expand()
+		self.tree.root.expand()
 
 	def update(self, state):
 		# Takes a game state, and appends it to the history.
