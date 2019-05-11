@@ -2,6 +2,7 @@
 import time
 from game import Board, Tiles, Game, letterScore
 from trie import Trie, Node
+from mcts import MonteCarloTreeSearch
 import copy
 
 import pygame
@@ -111,12 +112,20 @@ def update():
 	elif action == "lookAhead":
 		if len(game.players) > 0:
 			start = time.time()
-			player = game.players[game.active]
-			moveList = game.board.lookAhead(game.board, game.tiles, player, game.trie)
-			moveList.sort(key=lambda tup: -tup[1])
-			print(*moveList, sep='\n')
+
+			updatedBoard = copy.deepcopy(game.board)
+			updatedTiles = copy.deepcopy(game.tiles)
+			currentPlayer = game.players[game.active]
+
+			players = []
+			for i in game.players:
+				newTiles, updatedTiles = updatedTiles.getProbableTiles(updatedBoard, len(i.letters), currentPlayer.letters)
+				players.append([newTiles, i.score])
+			mcts = MonteCarloTreeSearch(game.board, game.tiles, players, game.active, game.trie, game.active, game.over)
+			bestMove = mcts.run(180)  # run for 3 minutes
 			end = time.time()
 			print("Completed search in", end - start, 'seconds')
+			print("Best move is:", bestMove)
 		else:
 			print("No players created")
 	elif action == "board":

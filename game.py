@@ -803,57 +803,6 @@ class Board:
 		for row in self.board:
 			print(*row, sep='\t')
 
-	def lookAhead(self, board, tiles, player, trie, depth=0):
-		"""Take a copy of the game and recursivly play all possible moves."""
-		boardCopy = board.copy()
-		tilesCopy = tiles.copy()
-		playerCopy = player.copy()
-		return boardCopy.recursiveSearch(boardCopy, tilesCopy, playerCopy, trie)
-
-	def recursiveSearch(self, board, tiles, player, trie, currentMoves=None, depth=0):
-		"""Given a player (whos turn it is), return the moves to finish with the highest score."""
-
-		# list of all moves found
-		moves = []
-
-		print(board.printBoard())
-		print(tiles.letters)
-		if len(tiles.letters) < 1:
-			moves.append(currentMoves)
-		elif depth < 2:
-			# No maves made yet
-			if currentMoves is None:
-				currentMoves = []
-
-			# Refill player tiles with most probable tiles
-			player.takeProbableLetters(tiles)
-
-			# Get all playable moves
-			canPlay = self.possibleMoves(player, trie)
-
-			# Try each playable move
-			searched = []
-			for move in canPlay:
-				if move not in searched:
-					searched.append(move)
-
-					# Convert tiles into a format that can be placed on the board
-					playerTiles = []
-					for tile in move[5]:
-						playerTiles.append([tile[1], tile[2]])
-						player.letters[tile[0]] = None  # Remove tile from player
-
-					boardCopy = board.copy()
-					tilesCopy = tiles.copy()
-					playerCopy = player.copy()
-					print(playerCopy.letters)
-					tilesAdded, score = boardCopy.addWord(playerTiles, move[2], move[3], move[4], trie, player)
-					currentMoves.append(move)
-					moves += boardCopy.recursiveSearch(boardCopy, tilesCopy, playerCopy, trie, currentMoves, depth + 1)
-
-		# return moves found
-		return moves
-
 class Tiles:
 	"""Scrabble tiles available and for each player."""
 
