@@ -30,50 +30,66 @@ class Node:
 	def expand(self, trie):
 		"""Expand the current node children with state.moves."""
 		if len(self.children) == 0:  # Only run if not done already
-			if self.state.moves == 0:
-				self.state.getMoves()
-
-			# Get the index of the next player
-			if self.state.currentPlayer == (len(self.state.players) - 1):
-				nextPlayer = 0
-			else:
-				nextPlayer = self.state.currentPlayer + 1
+			if len(self.state.moves) == 0:
+				self.state.getMoves(trie)
 
 			for i in self.state.moves:
-				updatedPlayers = copy.deepcopy(self.state.players)
-				updatedBoard = copy.deepcopy(self.state.board)
-				updatedTiles = copy.deepcopy(self.state.tiles)
+				self.makeFromMove(i, trie)
 
-				# Convert tiles into a format that can be placed on the board + place tiles
-				playerTiles = []
-				for tile in i[5]:
-					playerTiles.append([tile[1], tile[2]])
-					del updatedPlayers[self.state.currentPlayer][0][tile[0]]  # Remove tile from player
-				updatedBoard.addLetters(playerTiles, i[2], i[3], i[4], trie)  # Add word to board (we already have score so dont need to run addWord)
+	def makeFromMove(self, move, trie):
+		"""Make a new node given a move."""
+		# Get the index of the next player
+		if self.state.currentPlayer == (len(self.state.players) - 1):
+			nextPlayer = 0
+		else:
+			nextPlayer = self.state.currentPlayer + 1
 
-				# Update player tiles + game tiles
-				newTiles, updatedTiles = updatedTiles.getProbableTiles(updatedBoard, len(i[5]), updatedPlayers[0])
-				updatedPlayers[self.state.currentPlayer][0] += newTiles
+		updatedPlayers = self.state.players.copy()
+		updatedBoard = self.state.board.copy()
+		updatedTiles = self.state.tiles.copy()
 
-				updatedPlayers[self.state.currentPlayer][1] += i[1]  # Add move score to player
+		# Convert tiles into a format that can be placed on the board + place tiles
+		playerTiles = []
+		for tile in move[5]:
+			playerTiles.append([tile[1], tile[2]])
+			updatedPlayers[self.state.currentPlayer][0][tile[0]] = None # Remove tile from player
+		updatedBoard.addLetters(playerTiles, move[2], move[3], move[4], trie)  # Add word to board (we already have score so dont need to run addWord)
 
-				# If this move caused an end game then set gameEnd to true
-				if updatedBoard.playedTiles + sum(len(x[0]) for x in updatedPlayers) is 100:
-					gameEnd = True
-				else:
-					gameEnd = False
+		# Update player tiles + game tiles
+		newTiles, updatedRemainingTiles = updatedTiles.getProbableTiles(updatedBoard, len(move[5]), updatedPlayers[0], self.state.remainingTiles)
+		# Remove all elements that are None from player
+		updatedPlayers[self.state.currentPlayer][0] = [x for x in updatedPlayers[self.state.currentPlayer][0] if x is not None]
+		updatedPlayers[self.state.currentPlayer][0] += newTiles
 
-				print("hello")
+		updatedPlayers[self.state.currentPlayer][1] += move[1]  # Add move score to player
 
-				self.children.append(Node(State(
-					updatedBoard,
-					updatedTiles,
-					updatedPlayers,
-					nextPlayer,
-					self.state.targetPlayer,
-					gameEnd,
-					i
-				), self))
+		# If this move caused an end game then set gameEnd to true
+		if updatedBoard.playedTiles + sum(len(x[0]) for x in updatedPlayers) is 100:
+			gameEnd = True
+		else:
+			gameEnd = False
+
+		print(id(updatedTiles))
+		print(id(updatedRemainingTiles))
+		print(updatedPlayers)
+		print(updatedBoard.printBoard())
+
+		newNode = Node(State(
+			updatedBoard,
+			updatedTiles,
+			updatedRemainingTiles,
+			updatedPlayers,
+			nextPlayer,
+			self.state.targetPlayer,
+			gameEnd,
+			move
+		), self)
+
+		print(newNode)
+
+		self.children.append(newNode)
+
+		return newNode
 
 	def selectNode(self):
 		"""From the current node select the child node to explore next."""
@@ -108,16 +124,18 @@ class Node:
 	def simulate(self, trie):
 		"""Run through a game picking random moves until the game is over."""
 		if self.state.gameEnd is False:
-			self.expand(trie)
-			return self.simulate(random.choice(self.children)) # select child until game is over
+			print("self:", self.state.getMoves(trie))
+			print(self.state.players)
+			nextNode = self.makeFromMove(random.choice(self.state.getMoves(trie)), trie)
+			return nextNode.simulate(trie)  # select child until game is over
 		else:
-			targetPlayerScore = self.players[self.targetPlayer][0]
+			targetPlayerScore = self.state.players[self.state.targetPlayer][0]
 			highestOtherScore = 0
 			# Get highest score which is not target player
-			for i in range(len(self.players) - 1):
-				if i is not self.targetPlayer:
-					if self.players[i][0] > highestOtherScore:
-						highestOtherScore = self.players[i][0]
+			for i in range(len(self.state.players) - 1):
+				if i is not self.state.targetPlayer:
+					if self.state.players[i][0] > highestOtherScore:
+						highestOtherScore = self.state.players[i][0]
 			return targetPlayerScore - highestOtherScore  # Return the score of target player minus highest other player
 
 
@@ -125,10 +143,11 @@ class Node:
 class State:
 	"""A state the game is in."""
 
-	def __init__(self, board, tiles, players, currentPlayer, targetPlayer, gameEnd, moveMade):
+	def __init__(self, board, tiles, remainingTiles, players, currentPlayer, targetPlayer, gameEnd, moveMade):
 		"""Initilise the state."""
 		self.board = board  # Copy of the board object
 		self.tiles = tiles  # Copy of the tiles object
+		self.remainingTiles = remainingTiles  # List of tiles that are probably remaining to be picked
 		self.players = players  # array of player scores and probable racks, player = [rack, score]
 		self.currentPlayer = currentPlayer  # Current player number (index in players)
 		self.targetPlayer = targetPlayer  # Player number whick we want to win
@@ -138,16 +157,19 @@ class State:
 
 	def getMoves(self, trie):
 		"""Get an array of all moves that the current player can make."""
-		self.moves = self.board.possibleMoves(self.players[self.currentPlayer][0], trie)
+		# Only work out moves if not done already
+		if len(self.moves) is 0:
+			self.moves = self.board.possibleMoves(self.players[self.currentPlayer][0], trie)
+		return self.moves
 
 
 class MonteCarloTreeSearch:
 	"""MCTS class."""
 
-	def __init__(self, board, tiles, players, currentPlayer, trie, targetPlayer, gameEnd):
+	def __init__(self, board, tiles, players, currentPlayer, trie, targetPlayer, gameEnd, remainingTiles):
 		"""Initilise search."""
 		self.trie = trie
-		self.tree = Tree(State(board, tiles, players, currentPlayer, targetPlayer, gameEnd, None))
+		self.tree = Tree(State(board, tiles, remainingTiles, players, currentPlayer, targetPlayer, gameEnd, None))
 		self.tree.root.state.getMoves(self.trie)
 		self.tree.root.expand(self.trie)
 
@@ -157,7 +179,6 @@ class MonteCarloTreeSearch:
 
 		if time.time() - startTime < runTime:  # Only continue to serch for a specified number of seconds
 			# Select node
-			print(self.tree.root.children)
 			currentNode = self.tree.root.selectNode()
 			while len(currentNode.children) > 0:
 				currentNode = currentNode.selectNode()
@@ -166,9 +187,12 @@ class MonteCarloTreeSearch:
 			if currentNode.score is not 0 and currentNode.visits is not 0:
 				currentNode.expand(self.trie)
 				currentNode = currentNode.children[0]  # Select first child (all will be infinate ATM)
+			print("currentNode:", currentNode)
 
 			# simulate + backprop
+			print("sim")
 			score = currentNode.simulate(self.trie)
+			print("done")
 			currentNode.backpropagation(score, 1)
 		else:
 			return self.tree.root.selectNode().moveMade  # Return the best move found

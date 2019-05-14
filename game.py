@@ -845,6 +845,14 @@ class Tiles:
 	def copy(self):
 		return copy.deepcopy(self)
 
+	def __deepcopy__(self, memo):
+		cls = self.__class__
+		result = cls.__new__(cls)
+		memo[id(self)] = result
+		for k, v in self.__dict__.items():
+			setattr(result, k, copy.deepcopy(v, memo))
+		return result
+
 	def takeLetter(self):
 		"""Remove a letter from self.letters and return it."""
 		if sum(map(lambda x: int(x[2]), self.letters)):  # Sum of all tiles not in play
@@ -890,7 +898,10 @@ class Tiles:
 		remaining = sum(map(lambda x: int(x[2]), tiles))  # Number of tiles that are not on the board
 		tileProbabilities = []
 		for tile in range(len(tiles)):
-			tileProbabilities.append([tile, tiles[tile][1], (tiles[tile][2]/remaining)])  # [index of tile in self.letters, letter, probability]
+			if remaining is 0:
+				tileProbabilities.append([tile, tiles[tile][1], 0])  # [index of tile in self.letters, letter, probability]
+			else:
+				tileProbabilities.append([tile, tiles[tile][1], (tiles[tile][2]/remaining)])  # [index of tile in self.letters, letter, probability]
 		return tileProbabilities
 
 	def getRemainingTiles(self, board, playerLetters=None):
@@ -930,12 +941,13 @@ class Tiles:
 		remainingTiles = self.getRemainingTiles(board, player)
 		return self.getTileProbability(remainingTiles)
 
-	def getProbableTiles(self, board, numberOfTiles, currentPlayerTiles):
+	def getProbableTiles(self, board, numberOfTiles, currentPlayerTiles, remainingTiles=None):
 		"""Return an array of the X most probable tiles to be picked."""
 		probableTiles = []
 
 		# work out what tiles might be available with probability
-		remainingTiles = self.getRemainingTiles(board, currentPlayerTiles)
+		if remainingTiles is None:
+			remainingTiles = self.getRemainingTiles(board, currentPlayerTiles)
 
 		for i in range(numberOfTiles):
 			probableTile = sorted(self.getTileProbability(remainingTiles), key=lambda x: -x[2])[0]

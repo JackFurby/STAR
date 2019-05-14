@@ -119,9 +119,9 @@ def update():
 
 			players = []
 			for i in game.players:
-				newTiles, updatedTiles = updatedTiles.getProbableTiles(updatedBoard, len(i.letters), currentPlayer.letters)
+				newTiles, updatedRemainingTiles = updatedTiles.getProbableTiles(updatedBoard, len(i.letters), currentPlayer.letters)
 				players.append([newTiles, i.score])
-			mcts = MonteCarloTreeSearch(game.board, game.tiles, players, game.active, game.trie, game.active, game.over)
+			mcts = MonteCarloTreeSearch(updatedBoard, updatedTiles, players, game.active, game.trie, game.active, game.over, updatedRemainingTiles)
 			bestMove = mcts.run(180)  # run for 3 minutes
 			end = time.time()
 			print("Completed search in", end - start, 'seconds')
