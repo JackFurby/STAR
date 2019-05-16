@@ -845,14 +845,6 @@ class Tiles:
 	def copy(self):
 		return copy.deepcopy(self)
 
-	def __deepcopy__(self, memo):
-		cls = self.__class__
-		result = cls.__new__(cls)
-		memo[id(self)] = result
-		for k, v in self.__dict__.items():
-			setattr(result, k, copy.deepcopy(v, memo))
-		return result
-
 	def takeLetter(self):
 		"""Remove a letter from self.letters and return it."""
 		if sum(map(lambda x: int(x[2]), self.letters)):  # Sum of all tiles not in play

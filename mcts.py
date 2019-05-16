@@ -34,7 +34,26 @@ class Node:
 				self.state.getMoves(trie)
 
 			for i in self.state.moves:
-				self.makeFromMove(i, trie)
+				newNode = self.makeFromMove(i, trie)
+				#newNode.updateFromMove(trie)
+
+	def newChild(self, move, trie):
+		newNode = Node(State(
+			self.state.players.copy(),
+			self.state.tiles.copy(),
+			copy.deepcopy(self.state.remainingTiles),
+			updatedPlayers,
+			nextPlayer,
+			self.state.targetPlayer,
+			gameEnd,
+			move
+		), self)
+
+		print(newNode)
+
+		self.children.append(newNode)
+
+		return newNode
 
 	def makeFromMove(self, move, trie):
 		"""Make a new node given a move."""
@@ -44,7 +63,7 @@ class Node:
 		else:
 			nextPlayer = self.state.currentPlayer + 1
 
-		updatedPlayers = self.state.players.copy()
+		updatedPlayers = copy.deepcopy(self.state.players.copy())
 		updatedBoard = self.state.board.copy()
 		updatedTiles = self.state.tiles.copy()
 
@@ -71,13 +90,15 @@ class Node:
 
 		print(id(updatedTiles))
 		print(id(updatedRemainingTiles))
+		print(updatedRemainingTiles)
 		print(updatedPlayers)
+		print(id(updatedPlayers))
 		print(updatedBoard.printBoard())
 
 		newNode = Node(State(
 			updatedBoard,
 			updatedTiles,
-			updatedRemainingTiles,
+			copy.deepcopy(self.state.remainingTiles),
 			updatedPlayers,
 			nextPlayer,
 			self.state.targetPlayer,
