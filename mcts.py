@@ -63,9 +63,12 @@ class Node:
 		else:
 			nextPlayer = self.state.currentPlayer + 1
 
+		print('first:', self.state.players)
+
 		updatedPlayers = copy.deepcopy(self.state.players.copy())
 		updatedBoard = self.state.board.copy()
 		updatedTiles = self.state.tiles.copy()
+		remainingTiles = copy.deepcopy(self.state.remainingTiles)
 
 		# Convert tiles into a format that can be placed on the board + place tiles
 		playerTiles = []
@@ -75,7 +78,7 @@ class Node:
 		updatedBoard.addLetters(playerTiles, move[2], move[3], move[4], trie)  # Add word to board (we already have score so dont need to run addWord)
 
 		# Update player tiles + game tiles
-		newTiles, updatedRemainingTiles = updatedTiles.getProbableTiles(updatedBoard, len(move[5]), updatedPlayers[0], self.state.remainingTiles)
+		newTiles, updatedRemainingTiles = updatedTiles.getProbableTiles(updatedBoard, len(move[5]), updatedPlayers[0], remainingTiles)
 		# Remove all elements that are None from player
 		updatedPlayers[self.state.currentPlayer][0] = [x for x in updatedPlayers[self.state.currentPlayer][0] if x is not None]
 		updatedPlayers[self.state.currentPlayer][0] += newTiles
@@ -83,14 +86,17 @@ class Node:
 		updatedPlayers[self.state.currentPlayer][1] += move[1]  # Add move score to player
 
 		# If this move caused an end game then set gameEnd to true
+		print("played:", updatedBoard.playedTiles + sum(len(x[0]) for x in updatedPlayers))
 		if updatedBoard.playedTiles + sum(len(x[0]) for x in updatedPlayers) is 100:
 			gameEnd = True
 		else:
 			gameEnd = False
 
+		tempTiles = copy.deepcopy(updatedRemainingTiles)
+
 		print(id(updatedTiles))
-		print(id(updatedRemainingTiles))
-		print(updatedRemainingTiles)
+		print(id(tempTiles))
+		print(tempTiles)
 		print(updatedPlayers)
 		print(id(updatedPlayers))
 		print(updatedBoard.printBoard())
@@ -98,7 +104,7 @@ class Node:
 		newNode = Node(State(
 			updatedBoard,
 			updatedTiles,
-			copy.deepcopy(self.state.remainingTiles),
+			tempTiles,
 			updatedPlayers,
 			nextPlayer,
 			self.state.targetPlayer,
@@ -145,7 +151,7 @@ class Node:
 	def simulate(self, trie):
 		"""Run through a game picking random moves until the game is over."""
 		if self.state.gameEnd is False:
-			print("self:", self.state.getMoves(trie))
+			#print("self:", self.state.getMoves(trie))
 			print(self.state.players)
 			nextNode = self.makeFromMove(random.choice(self.state.getMoves(trie)), trie)
 			return nextNode.simulate(trie)  # select child until game is over
