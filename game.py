@@ -942,9 +942,11 @@ class Tiles:
 			remainingTiles = self.getRemainingTiles(board, currentPlayerTiles)
 
 		for i in range(numberOfTiles):
-			probableTile = sorted(self.getTileProbability(remainingTiles), key=lambda x: -x[2])[0]
-			probableTiles.append(probableTile[1])
-			remainingTiles[probableTile[0]][2] -= 1
+			# If probability is 0 then tile = None (if probability is 0 then there are no tiles remaining)
+			if sorted(self.getTileProbability(remainingTiles), key=lambda x: -x[2])[0][2] is not 0:
+				probableTile = sorted(self.getTileProbability(remainingTiles), key=lambda x: -x[2])[0]
+				probableTiles.append(probableTile[1])
+				remainingTiles[probableTile[0]][2] -= 1
 
 		return probableTiles, remainingTiles
 

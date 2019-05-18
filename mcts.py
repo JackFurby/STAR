@@ -49,8 +49,6 @@ class Node:
 			move
 		), self)
 
-		print(newNode)
-
 		self.children.append(newNode)
 
 		return newNode
@@ -63,7 +61,7 @@ class Node:
 		else:
 			nextPlayer = self.state.currentPlayer + 1
 
-		print('first:', self.state.players)
+		#print('first:', self.state.players)
 
 		updatedPlayers = copy.deepcopy(self.state.players.copy())
 		updatedBoard = self.state.board.copy()
@@ -80,13 +78,16 @@ class Node:
 		# Update player tiles + game tiles
 		newTiles, updatedRemainingTiles = updatedTiles.getProbableTiles(updatedBoard, len(move[5]), updatedPlayers[0], remainingTiles)
 		# Remove all elements that are None from player
-		updatedPlayers[self.state.currentPlayer][0] = [x for x in updatedPlayers[self.state.currentPlayer][0] if x is not None]
-		updatedPlayers[self.state.currentPlayer][0] += newTiles
+
+		for i in range(len(updatedPlayers[self.state.currentPlayer][0])):
+			if updatedPlayers[self.state.currentPlayer][0][i] is None:
+				if len(newTiles) > 0:
+					updatedPlayers[self.state.currentPlayer][0][i] = newTiles[0]
+					del newTiles[0]
 
 		updatedPlayers[self.state.currentPlayer][1] += move[1]  # Add move score to player
 
 		# If this move caused an end game then set gameEnd to true
-		print("played:", updatedBoard.playedTiles + sum(len(x[0]) for x in updatedPlayers))
 		if updatedBoard.playedTiles + sum(len(x[0]) for x in updatedPlayers) is 100:
 			gameEnd = True
 		else:
@@ -94,12 +95,13 @@ class Node:
 
 		tempTiles = copy.deepcopy(updatedRemainingTiles)
 
-		print(id(updatedTiles))
-		print(id(tempTiles))
-		print(tempTiles)
-		print(updatedPlayers)
-		print(id(updatedPlayers))
-		print(updatedBoard.printBoard())
+		#print(id(updatedTiles))
+		#print(id(tempTiles))
+		#print(tempTiles)
+		#print(updatedPlayers)
+		#print(id(updatedPlayers))
+		#print(updatedBoard.printBoard())
+		#print('move:', move)
 
 		newNode = Node(State(
 			updatedBoard,
@@ -112,8 +114,6 @@ class Node:
 			move
 		), self)
 
-		print(newNode)
-
 		self.children.append(newNode)
 
 		return newNode
@@ -125,14 +125,14 @@ class Node:
 		infiniteFound = False
 		for i in self.children:
 			# If node has not been visited before then set its UCB1 score to infinite
-			if self.score is 0 and self.visits is 0:
+			if i.visits is 0:
 				selectedChild = i
 				maxUCB1 = 0
 				infiniteFound = True
 			# If node has been visited then caculate its UCB1 score and if higher than previous max then then update that
 			else:
 				# http://mcts.ai/about/
-				ucb1 = ((self.score / self.visits) + self.bias) * math.sqrt(math.log(self.parent.visits) / self.visits)
+				ucb1 = ((i.score / i.visits) + i.bias) * math.sqrt(math.log(i.parent.visits) / i.visits)
 				# Only update selectedChild if an infinite node has not been found
 				if infiniteFound is not True:
 					if ucb1 > maxUCB1:
@@ -143,27 +143,32 @@ class Node:
 
 	def backpropagation(self, score=0, visit=0):
 		"""Update all parent nodes score and visit count."""
-		while self.parent is not None:
-			self.score += score
-			self.visits += visit
+		self.score += score
+		self.visits += visit
+
+		# Only continue when there are more parents to go to
+		if self.parent is not None:
 			self.parent.backpropagation(score, visit)
 
 	def simulate(self, trie):
 		"""Run through a game picking random moves until the game is over."""
-		if self.state.gameEnd is False:
+		moves = self.state.getMoves(trie)
+		if self.state.gameEnd is False and len(moves) > 0:
 			#print("self:", self.state.getMoves(trie))
 			print(self.state.players)
-			nextNode = self.makeFromMove(random.choice(self.state.getMoves(trie)), trie)
+			nextNode = self.makeFromMove(random.choice(moves), trie)
 			return nextNode.simulate(trie)  # select child until game is over
 		else:
-			targetPlayerScore = self.state.players[self.state.targetPlayer][0]
+			targetPlayerScore = self.state.players[self.state.targetPlayer][1]
 			highestOtherScore = 0
 			# Get highest score which is not target player
 			for i in range(len(self.state.players) - 1):
 				if i is not self.state.targetPlayer:
-					if self.state.players[i][0] > highestOtherScore:
-						highestOtherScore = self.state.players[i][0]
-			return targetPlayerScore - highestOtherScore  # Return the score of target player minus highest other player
+					if self.state.players[i][1] > highestOtherScore:
+						highestOtherScore = self.state.players[i][1]
+			print('target:', targetPlayerScore)
+			print('highest', highestOtherScore)
+			return self
 
 
 
@@ -185,7 +190,7 @@ class State:
 	def getMoves(self, trie):
 		"""Get an array of all moves that the current player can make."""
 		# Only work out moves if not done already
-		if len(self.moves) is 0:
+		if len(self.moves) is 0:                                                                                           #<<<<<<<<<<< Add skip go and swap tiles
 			self.moves = self.board.possibleMoves(self.players[self.currentPlayer][0], trie)
 		return self.moves
 
@@ -204,7 +209,7 @@ class MonteCarloTreeSearch:
 		"""Run MCST until time runs out."""
 		startTime = time.time()
 
-		if time.time() - startTime < runTime:  # Only continue to serch for a specified number of seconds
+		while time.time() - startTime < runTime:  # Only continue to serch for a specified number of seconds
 			# Select node
 			currentNode = self.tree.root.selectNode()
 			while len(currentNode.children) > 0:
@@ -214,12 +219,23 @@ class MonteCarloTreeSearch:
 			if currentNode.score is not 0 and currentNode.visits is not 0:
 				currentNode.expand(self.trie)
 				currentNode = currentNode.children[0]  # Select first child (all will be infinate ATM)
-			print("currentNode:", currentNode)
 
 			# simulate + backprop
 			print("sim")
-			score = currentNode.simulate(self.trie)
+			finalNode = currentNode.simulate(self.trie)
 			print("done")
-			currentNode.backpropagation(score, 1)
+
+			targetPlayerScore = finalNode.state.players[finalNode.state.targetPlayer][1]
+			highestOtherScore = 0
+			# Get highest score which is not target player
+			for i in range(len(finalNode.state.players)):
+				if i is not finalNode.state.targetPlayer:
+					if finalNode.state.players[i][1] > highestOtherScore:
+						highestOtherScore = finalNode.state.players[i][1]
+			print('target:', targetPlayerScore)
+			print('highest', highestOtherScore)
+			score = targetPlayerScore - highestOtherScore  # Return the score of target player minus highest other player
+
+			finalNode.backpropagation(score, 1)
 		else:
-			return self.tree.root.selectNode().moveMade  # Return the best move found
+			return self.tree.root.selectNode().state.moveMade  # Return the best move found
