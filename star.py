@@ -119,8 +119,14 @@ def update():
 
 			players = []
 			for i in game.players:
-				newTiles, updatedRemainingTiles = updatedTiles.getProbableTiles(updatedBoard, len(i.letters), currentPlayer.letters)
-				players.append([newTiles, i.score])
+				# we know our tiles but not other player tiles
+				if i is not currentPlayer:
+					newTiles, updatedRemainingTiles = updatedTiles.getProbableTiles(updatedBoard, len(i.letters), currentPlayer.letters)
+					players.append([newTiles, i.score])
+				else:
+					players.append([currentPlayer.letters, currentPlayer.score])
+
+			print('players:', players)
 			mcts = MonteCarloTreeSearch(updatedBoard, updatedTiles, players, game.active, game.trie, game.active, game.over, updatedRemainingTiles)
 			bestMove = mcts.run(180)  # run for 3 minutes
 			#bestMove = mcts.run(600)  # run for 10 minutes
