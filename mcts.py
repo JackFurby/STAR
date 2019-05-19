@@ -118,7 +118,7 @@ class Node:
 
 		return newNode
 
-	def selectNode(self):
+	def selectNode(self, final=False):
 		"""From the current node select the child node to explore next."""
 		selectedChild = self.children[0]  # Select the first child if no other child looks good
 		maxUCB1 = 0  # this is only used if all children are not infinite (score and visits are not 0)
@@ -126,9 +126,10 @@ class Node:
 		for i in self.children:
 			# If node has not been visited before then set its UCB1 score to infinite
 			if i.visits is 0:
-				selectedChild = i
-				maxUCB1 = 0
-				infiniteFound = True
+				if final is False:  # IF final is true we dont want to look at nodes that have not been searched (we are picking the best move)
+					selectedChild = i
+					maxUCB1 = 0
+					infiniteFound = True
 			# If node has been visited then caculate its UCB1 score and if higher than previous max then then update that
 			else:
 				# http://mcts.ai/about/
@@ -166,8 +167,6 @@ class Node:
 				if i is not self.state.targetPlayer:
 					if self.state.players[i][1] > highestOtherScore:
 						highestOtherScore = self.state.players[i][1]
-			print('target:', targetPlayerScore)
-			print('highest', highestOtherScore)
 			return self
 
 
@@ -218,12 +217,12 @@ class MonteCarloTreeSearch:
 			# If node is not infinate then expand
 			if currentNode.score is not 0 and currentNode.visits is not 0:
 				currentNode.expand(self.trie)
-				currentNode = currentNode.children[0]  # Select first child (all will be infinate ATM)
+				# Only move to new node if there are nodes to move to
+				if len(currentNode.children) > 0:
+					currentNode = currentNode.children[0]  # Select first child (all will be infinate ATM)
 
 			# simulate + backprop
-			print("sim")
 			finalNode = currentNode.simulate(self.trie)
-			print("done")
 
 			targetPlayerScore = finalNode.state.players[finalNode.state.targetPlayer][1]
 			highestOtherScore = 0
@@ -232,10 +231,8 @@ class MonteCarloTreeSearch:
 				if i is not finalNode.state.targetPlayer:
 					if finalNode.state.players[i][1] > highestOtherScore:
 						highestOtherScore = finalNode.state.players[i][1]
-			print('target:', targetPlayerScore)
-			print('highest', highestOtherScore)
 			score = targetPlayerScore - highestOtherScore  # Return the score of target player minus highest other player
 
 			finalNode.backpropagation(score, 1)
 		else:
-			return self.tree.root.selectNode().state.moveMade  # Return the best move found
+			return self.tree.root.selectNode(True)  # Return the best move found

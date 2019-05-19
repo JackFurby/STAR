@@ -123,9 +123,13 @@ def update():
 				players.append([newTiles, i.score])
 			mcts = MonteCarloTreeSearch(updatedBoard, updatedTiles, players, game.active, game.trie, game.active, game.over, updatedRemainingTiles)
 			bestMove = mcts.run(180)  # run for 3 minutes
+			#bestMove = mcts.run(600)  # run for 10 minutes
 			end = time.time()
 			print("Completed search in", end - start, 'seconds')
-			print("Best move is:", bestMove)
+			print("Best move is:", bestMove.state.moveMade)
+			print("Node score:", bestMove.score)
+			print("Node visits:", bestMove.visits)
+			print("Node average:", bestMove.score / bestMove.visits)
 		else:
 			print("No players created")
 	elif action == "board":
