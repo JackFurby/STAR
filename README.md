@@ -56,3 +56,20 @@ Find moves will return almost all playable moves a player can make taking into c
 findMoves was based of the algorithem used in [The World’s Fastest Scrabble Program](http://www.cs.cmu.edu/afs/cs/academic/class/15451-s06/www/lectures/scrabble.pdf).
 
 Currently words are found by extending right or down on starting positions. It also has the ability to move the starting position up or left by 7 spaces. This results in almost all possible moves being found. The only situation where words are not found are when placing parallel words starting before (above or to the left) of a starting position.
+
+## lookAhead
+
+In order to find the best move to make lookAhead will use a Monte Carlo tree search (MCTS) to find the best move to make considering the affect on the end game. The current implementation of this is basic and there are a number of known issues including the probable player rack is incorrect and the performance is at least 10 times slower than it needts be be to become useful.
+
+A MCTS works by running through the following steps:
+
+1. **Selection** - Recursively select nodes from the root node until a leaf node is found (I am using UCB1 score for selection)
+2. **Expansion** - If the leaf node does not end the game then create more nodes from the leaf node (one for each possible move)
+3. **Simulation** - From one of the leaf nodes select random moves until an end game is reached
+4. **Backpropagation** - from the node containing the end game update each parent node with the score and visit until the root node.
+
+A full description of MCTS can be found at [http://mcts.ai/about/](http://mcts.ai/about/).
+
+For each node in my MCTS I an saving the state of the board, player racks + score and tiles in the game. This is one area that performance is not great. The score of the node is the current players score minus the next highest player score (higher score is better). I would expect this to be improved over time (perhaps with some ML).
+	
+The tree search will continue for a set amount of time (3 mins ATM). After this time the best searched move will be returned (using UCB1 score but ignoring infinite scores). Due to performance issues this node for the move will normally only get one visit.
