@@ -118,6 +118,7 @@ def update():
 			currentPlayer = game.players[game.active]
 
 			players = []
+			newTiles, updatedRemainingTiles = updatedTiles.getProbableTiles(updatedBoard, 0, currentPlayer.letters)
 			for i in game.players:
 				# we know our tiles but not other player tiles
 				if i is not currentPlayer:
