@@ -214,7 +214,7 @@ class Board:
 					nextLetter = None
 				else:
 					# if next space is off the board set it to none
-					if nextX + 1 > 14:
+					if nextX + 1 > self.WIDTH:
 						nextLetter = None
 					# if next space is on the board, see if it is populated
 					else:
@@ -228,7 +228,7 @@ class Board:
 					nextLetter = None
 				else:
 					# if next space is off the board set it to none
-					if nextY + 1 > 14:
+					if nextY + 1 > self.HEIGHT:
 						nextLetter = None
 					# if next space is on the board, see if it is populated
 					else:
@@ -472,7 +472,7 @@ class Board:
 
 			find = True
 			while find:
-				if (x > 14 or y > 14) or self.board[y][x] in self.emptyTiles:
+				if (x > self.WIDTH or y > self.HEIGHT) or self.board[y][x] in self.emptyTiles:
 					if direction == 'right':
 						endY = y
 						endX = x - 1
@@ -509,7 +509,7 @@ class Board:
 
 			findEnd = True
 			while findEnd:
-				if (x > 14 or y > 14) or self.board[y][x] in self.emptyTiles:
+				if (x > self.WIDTH or y > self.HEIGHT) or self.board[y][x] in self.emptyTiles:
 					if direction == 'right':
 						endY = y
 						endX = x - 1
@@ -611,111 +611,101 @@ class Board:
 			else:
 				return False, wordScore
 
-	def checkWord(self, x, y, direction, beginning, trie, placedWord):
-		"""Given the x, y, and if the word starts, ends or contains that tile will return true or false if the word is valid + new word score."""
-		startX, startY, endX, endY = self.findWordPosition(x, y, beginning, direction)
-
-		# Gets the new word on the board as a string
-		word, wordList = self.getBoardSpaces(startX, startY, endX, endY, direction)
-
-		# Calculates word score
-		multiplierTotal = 1
-		wordScore = 0
-		for letter in wordList:
-			# If there is a multiplyer applied to the tile
-			if len(letter) > 2:
-				# If multiplier applies to word
-				if letter[3] is True:
-					multiplierTotal = multiplierTotal * letter[2]
-					wordScore = wordScore + letter[1]
-				# If multiplier applies to tile
-				else:
-					wordScore = wordScore + (letter[1] * letter[2])
-
-				# If getting score for new word placed (not additional words created) remove multiplyer from tile on board
-				if placedWord is True:
-					self.board[letter[5]][letter[4]] = [letter[0], letter[1]]
-			# If there is no multiplier
-			else:
-				wordScore = wordScore + letter[1]
-
-		wordScore = wordScore * multiplierTotal  # Apply word multiplier
-
-		# checks if the word found is accepted
-		if trie.hasWord(word.lower()):
-			return True, wordScore
-		else:
-			# If word is a single tile down count it (single tile words are not counted as words)
-			if len(word) == 1:
-				return True, 0
-			else:
-				return False, 0
-
 	def addLetters(self, letters, x, y, direction, trie):
-		"""Add letters one at a time from word input, checks it and calls itself."""
-		# If x and y are on board
-		if (x < self.WIDTH and x >= 0) and (y < self.HEIGHT and y >= 0):
-			nextToTiles, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.nextToTiles(x, y)
-			score = 0  # Score of current go
-			# x and y is an empty space
-			if self.board[y][x] in self.emptyTiles:
-				# If tile placed is in the center of the board
-				if x is 7 and y is 7:
-					nextToTiles = True
+		"""Add letters to board + check if word is valid + work out score."""
+		score = 0  # Score of current go
+		nextToTileReturn = False
+		for letter in letters:
+			# If x and y are on board
+			if (x < self.WIDTH and x >= 0) and (y < self.HEIGHT and y >= 0):
+				nextToTiles, left, right, up, down, leftEnd, rightEnd, upEnd, downEnd = self.nextToTiles(x, y)
 
-				# Check tiles next to each tiles places to see if they add to existing words
-				# If true the new word will be checked and return False if not valid
-				if direction == 'right':
-					# If tile above or below is not empty
-					if up or down:
-						newWord, wordScore = self.blindCheckWord(x, y, [letters[0][0], letters[0][1]], 'down', trie, up, down)
-						if newWord is False:
-							return False, True, score
-						else:
-							score = score + wordScore
-				else:
-					# If tile left or right is not empty
-					if left or right:
-						newWord, wordScore = self.blindCheckWord(x, y, [letters[0][0], letters[0][1]], 'down', trie, left, right)
-						if newWord is False:
-							return False, True, score
-						else:
-							score = score + wordScore
+				if nextToTiles is True:
+					nextToTileReturn = True
 
-				# Place tile
-				letterPlacement = self.addLetter(letters[0][0], letters[0][1], x, y)
-				del letters[0]  # tile placed. Remove from list
+				# x and y is an empty space
+				if self.board[y][x] in self.emptyTiles:
+					# If tile placed is in the center of the board
+					if x is 7 and y is 7:
+						nextToTileReturn = True
 
-				# If at the end of tiles being added to the board check word is accepted
-				if len(letters) == 0:
-					newWord, wordScore = self.checkWord(x, y, direction, None, trie, True)
-
-					if newWord is False:
-						return False, nextToTiles, score + wordScore
+					# Check tiles next to each tiles places to see if they add to existing words
+					# If true the new word will be checked and return False if not valid
+					if direction == 'right':
+						# If tile above or below is not empty
+						if up or down:
+							newWord, wordScore = self.blindCheckWord(x, y, [letter[0], letter[1]], 'down', trie, up, down)
+							if newWord is False:
+								return False, True, 0
+							else:
+								score += wordScore
 					else:
-						return True, nextToTiles, score + wordScore
-				# tile placed, move to next tile
+						# If tile left or right is not empty
+						if left or right:
+							newWord, wordScore = self.blindCheckWord(x, y, [letter[0], letter[1]], 'right', trie, left, right)
+							if newWord is False:
+								return False, True, 0
+							else:
+								score += wordScore
+
+					# Place tile
+					letterPlacement = self.addLetter(letter[0], letter[1], x, y)
+
+					if direction == 'right':
+						x += 1
+					else:
+						y += 1
+
+				# x and y already contains a tile
 				else:
 					if direction == 'right':
-						acceptedReturn, nextToTileReturn, scoreReturn = self.addLetters(letters, x + 1, y, 'right', trie)
+						x += 1
+						nextToTileReturn = True
 					else:
-						acceptedReturn, nextToTileReturn, scoreReturn = self.addLetters(letters, x, y + 1, 'down', trie)
+						y += 1
+						nextToTileReturn = True
 
-					if nextToTileReturn is True:
-						nextToTiles = True
-					return acceptedReturn, nextToTiles, score + scoreReturn
-
-			# x and y already contains a tile
+			# x and/or y is not on board
 			else:
-				if direction == 'right':
-					acceptedReturn, nextToTileReturn, scoreReturn = self.addLetters(letters, x + 1, y, 'right', trie)
-				else:
-					acceptedReturn, nextToTileReturn, scoreReturn = self.addLetters(letters, x, y + 1, 'down', trie)
+				return False, False, 0
 
-				return acceptedReturn, nextToTiles, score + scoreReturn
-		# x and/or y is not on board
+		# x or y will be off by one after loop
+		if direction == 'right':
+			x -= 1
 		else:
-			return False, False, 0
+			y -= 1
+
+		# Gets the new word on the board as a string
+		startX, startY, endX, endY = self.findWordPosition(x, y, None, direction)
+		word, wordList = self.getBoardSpaces(startX, startY, endX, endY, direction)
+
+		# If new word is accepted get score and return
+		if trie.hasWord(word.lower()):
+			# Calculates word score
+			multiplierTotal = 1
+			wordScore = 0
+			for letter in wordList:
+				# If there is a multiplyer applied to the tile
+				if len(letter) > 2:
+					# If multiplier applies to word
+					if letter[3] is True:
+						multiplierTotal = multiplierTotal * letter[2]
+						wordScore = wordScore + letter[1]
+					# If multiplier applies to tile
+					else:
+						wordScore = wordScore + (letter[1] * letter[2])
+
+					# Remove multiplyer from tile on board
+					self.board[letter[5]][letter[4]] = [letter[0], letter[1]]
+				# If there is no multiplier
+				else:
+					wordScore = wordScore + letter[1]
+
+			wordScore = wordScore * multiplierTotal  # Apply word multiplier
+
+			return True, nextToTileReturn, score + wordScore
+		else:
+			return False, nextToTileReturn, 0
 
 	def addWord(self, word, x, y, direction, trie, player):
 		"""Add a word to the board specifying the x and y position of the first tile."""
