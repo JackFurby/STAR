@@ -214,7 +214,7 @@ class Board:
 					nextLetter = None
 				else:
 					# if next space is off the board set it to none
-					if nextX + 1 > self.WIDTH:
+					if nextX + 1 > self.WIDTH - 1:
 						nextLetter = None
 					# if next space is on the board, see if it is populated
 					else:
@@ -228,7 +228,7 @@ class Board:
 					nextLetter = None
 				else:
 					# if next space is off the board set it to none
-					if nextY + 1 > self.HEIGHT:
+					if nextY + 1 > self.HEIGHT - 1:
 						nextLetter = None
 					# if next space is on the board, see if it is populated
 					else:
@@ -472,7 +472,7 @@ class Board:
 
 			find = True
 			while find:
-				if (x > self.WIDTH or y > self.HEIGHT) or self.board[y][x] in self.emptyTiles:
+				if (x > self.WIDTH - 1 or y > self.HEIGHT - 1) or self.board[y][x] in self.emptyTiles:
 					if direction == 'right':
 						endY = y
 						endX = x - 1
@@ -509,7 +509,7 @@ class Board:
 
 			findEnd = True
 			while findEnd:
-				if (x > self.WIDTH or y > self.HEIGHT) or self.board[y][x] in self.emptyTiles:
+				if (x > self.WIDTH - 1 or y > self.HEIGHT - 1) or self.board[y][x] in self.emptyTiles:
 					if direction == 'right':
 						endY = y
 						endX = x - 1

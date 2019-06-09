@@ -156,7 +156,7 @@ class Node:
 		moves = self.state.getMoves(trie)
 		if self.state.gameEnd is False and len(moves) > 0:
 			#print("self:", self.state.getMoves(trie))
-			print(self.state.players)
+			#print(self.state.players)
 			nextNode = self.makeFromMove(random.choice(moves), trie)
 			return nextNode.simulate(trie)  # select child until game is over
 		else:
@@ -211,6 +211,14 @@ class MonteCarloTreeSearch:
 		while time.time() - startTime < runTime:  # Only continue to serch for a specified number of seconds
 			# Select node
 			currentNode = self.tree.root.selectNode()
+			print("-----------")
+			print("Current search")
+			print()
+			print("Node score:", currentNode.score)
+			print("Node visits:", currentNode.visits)
+			print("Move:", currentNode.state.moveMade)
+			print("Player:", currentNode.state.currentPlayer + 1)
+			print("-----------")
 			while len(currentNode.children) > 0:
 				currentNode = currentNode.selectNode()
 
