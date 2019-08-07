@@ -38,10 +38,16 @@ class Node:
 				#newNode.updateFromMove(trie)
 
 	def newChild(self, move, trie):
+		remainingTiles = []
+
+		# Clone remaining tiles
+		for i in self.state.remainingTiles:
+			remainingTiles.append(i[:])
+
 		newNode = Node(State(
 			self.state.players.copy(),
 			self.state.tiles.copy(),
-			copy.deepcopy(self.state.remainingTiles),
+			remainingTiles,
 			updatedPlayers,
 			nextPlayer,
 			self.state.targetPlayer,
@@ -63,10 +69,28 @@ class Node:
 
 		#print('first:', self.state.players)
 
-		updatedPlayers = copy.deepcopy(self.state.players.copy())
+		updatedPlayers = []
+
+		# Clone players
+		for i in self.state.players:
+			player = []
+			for j in i:
+				if type(j) == int:
+					player.append(j)
+				else:
+					player.append(j[:])
+			updatedPlayers.append(player)
+
+		remainingTiles = []
+
+		# Clone remaining tiles
+		for i in self.state.remainingTiles:
+			remainingTiles.append(i[:])
+
+		#updatedPlayers = copy.deepcopy(self.state.players)
 		updatedBoard = self.state.board.copy()
 		updatedTiles = self.state.tiles.copy()
-		remainingTiles = copy.deepcopy(self.state.remainingTiles)
+		#remainingTiles = copy.deepcopy(self.state.remainingTiles)
 
 		# Convert tiles into a format that can be placed on the board + place tiles
 		playerTiles = []
@@ -93,9 +117,9 @@ class Node:
 		else:
 			gameEnd = False
 
-		tempTiles = copy.deepcopy(updatedRemainingTiles)
-
-		#print(id(updatedTiles))
+		#print(id(updatedRemainingTiles))
+		#print(updatedRemainingTiles)
+		#print(tempTiles)
 		#print(id(tempTiles))
 		#print(tempTiles)
 		#print(updatedPlayers)
@@ -106,7 +130,7 @@ class Node:
 		newNode = Node(State(
 			updatedBoard,
 			updatedTiles,
-			tempTiles,
+			updatedRemainingTiles,
 			updatedPlayers,
 			nextPlayer,
 			self.state.targetPlayer,
@@ -217,7 +241,7 @@ class MonteCarloTreeSearch:
 			print("Node score:", currentNode.score)
 			print("Node visits:", currentNode.visits)
 			print("Move:", currentNode.state.moveMade)
-			print("Player:", currentNode.state.currentPlayer + 1)
+			print("Player:", currentNode.state.currentPlayer)
 			print("-----------")
 			while len(currentNode.children) > 0:
 				currentNode = currentNode.selectNode()

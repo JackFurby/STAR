@@ -111,12 +111,14 @@ class Trie:
 								containsTrue = False
 						if containsTrue:
 							newLetters = letters.copy()
+							#newLetters = letters
 							del newLetters[i]
 							words += self.wordSearch(newLetters, suffix=suffix, contains=containsTrue, containsSet=True, currentNode=containsNode)
 					# if wildcard played then look at all children
 					elif letter == '?':
 						for char in currentNode.children:
 							newLetters = letters.copy()
+							#newLetters = letters
 							del newLetters[i]
 							# Suffix word search
 							if suffix is not None:
@@ -126,6 +128,7 @@ class Trie:
 								words += self.wordSearch(newLetters, contains=contains, containsSet=containsSet, currentNode=currentNode.children[char])
 					elif letter in currentNode.children:
 						newLetters = letters.copy()
+						#newLetters = letters
 						del newLetters[i]
 						# Suffix word search
 						if suffix is not None:
